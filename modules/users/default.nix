@@ -1,6 +1,6 @@
-{ flake.modules.nixos.users = { ... }: {
+{ flake.modules.nixos.users = { username, ... }: {
 
-  users.users.n = {
+  users.users.${username} = {
     isNormalUser = true;
     extraGroups = [ "wheel" ];
     openssh.authorizedKeys.keys = [
