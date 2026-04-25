@@ -10,7 +10,8 @@
     neovim
     ripgrep
     python3
-
+    nodejs
+    nodePackages.live-server
   ];
 
 
