@@ -1,27 +1,29 @@
 { self, inputs, ... }:
 let
-  username = "n";
-  hostname = "yor-zarad";
+  username = "ben";
+  hostname = "laptop";
   addr = "${username}@${hostname}";
   system = "x86_64-linux";
-  systemStateVersion = "24.11";
+  systemStateVersion = "25.11";
 in {
   flake.nixosConfigurations.${hostname} = inputs.nixpkgs.lib.nixosSystem {
     specialArgs = { inherit hostname username; };
     modules = with self.modules.nixos; [
-      inputs.disko.nixosModules.disko
 
       core
-      disko-base
       openssh
       users
 
       {
-        hardware.facter.reportPath = ./facter.json;
+        boot.loader = {
+	  systemd-boot.enable = true;
+	  efi.canTouchEfiVariables = true;
+	};
+
         nixpkgs.hostPlatform.system = system;
         system.stateVersion = systemStateVersion;
       }
-
+	./_nix/hardware-configuration.nix	
     ];
   };
 
