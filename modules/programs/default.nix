@@ -7,7 +7,6 @@
     git
     curl
     wget
-    neovim
     ripgrep
     python3
     nodejs

@@ -59,6 +59,10 @@ in {
       }
 
       tmux
+      neovim
+      bash
+      wezterm
+      opencode
 
     ];
   };
