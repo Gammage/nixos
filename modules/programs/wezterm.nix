@@ -19,6 +19,8 @@
 
   home.packages = with pkgs; [
     wezterm
-    (nerdfonts.override { fonts = [ "Hermit" ]; })
+    nerdfonts.hermit
   ];
+
+  fonts.fontconfig.enable = true;
 }
