@@ -10,7 +10,6 @@
     python3
     nodejs
     live-server
-    nerdfonts.hermit
     home-manager
   ];
 
