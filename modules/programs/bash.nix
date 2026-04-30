@@ -57,4 +57,5 @@
   home.packages = with pkgs; [
     nodejs
   ];
+  };
 }
