@@ -11,6 +11,7 @@
     python3
     nodejs
     nodePackages.live-server
+    nerdfonts.hermit
   ];
 
 

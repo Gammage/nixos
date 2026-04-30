@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ ... }: {
   programs.wezterm = {
     enable = true;
     extraConfig = ''
@@ -16,9 +16,4 @@
       return config
     '';
   };
-
-  home.packages = with pkgs; [
-    wezterm
-    nerdfonts.hermit
-  ];
 }
