@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ flake.modules.homeManager.bash = { pkgs, ... }: {
   programs.bash = {
     enable = true;
     bashrcExtra = ''

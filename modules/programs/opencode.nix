@@ -1,4 +1,4 @@
-{ ... }: {
+{ flake.modules.homeManager.opencode = { ... }: {
   home.file.".opencode".source = ./opencode-config;
 
   sessionVariables = {
