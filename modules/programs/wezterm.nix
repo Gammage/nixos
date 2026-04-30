@@ -21,6 +21,4 @@
     wezterm
     nerdfonts.hermit
   ];
-
-  fonts.fontconfig.enable = true;
 }
