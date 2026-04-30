@@ -9,7 +9,7 @@
     ripgrep
     python3
     nodejs
-    nodePackages.live-server
+    live-server
     nerdfonts.hermit
     home-manager
   ];
