@@ -9,17 +9,17 @@ in {
   flake.nixosConfigurations.${hostname} = inputs.nixpkgs.lib.nixosSystem {
     specialArgs = { inherit hostname username; };
     modules = with self.modules.nixos; [
-
       core
       openssh
       users
-
+      programs
+      
       {
         boot.loader = {
-	  systemd-boot.enable = true;
-	  efi.canTouchEfiVariables = true;
+ 	  systemd-boot.enable = true;
+ 	  efi.canTouchEfiVariables = true;
 	};
-
+      
         nixpkgs.hostPlatform.system = system;
         system.stateVersion = systemStateVersion;
       }
