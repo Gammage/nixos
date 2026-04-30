@@ -5,3 +5,4 @@
     OPENCODE_CONFIG_DIR = "$HOME/.opencode";
   };
 }
+}
