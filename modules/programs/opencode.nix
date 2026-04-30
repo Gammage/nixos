@@ -1,7 +1,7 @@
 { ... }: {
   home.file.".opencode".source = ./opencode-config;
 
-  environment.sessionVariables = {
+  sessionVariables = {
     OPENCODE_CONFIG_DIR = "$HOME/.opencode";
   };
 }
