@@ -3,7 +3,6 @@
   programs.firefox.enable = true;
 
   environment.systemPackages = with pkgs; [
-
     git
     curl
     wget
@@ -12,6 +11,7 @@
     nodejs
     nodePackages.live-server
     nerdfonts.hermit
+    home-manager
   ];
 
 
