@@ -16,9 +16,6 @@
       HISTFILESIZE=2000
       shopt -s checkwinsize
 
-      # less
-      eval "$(SHELL=/bin/sh lesspipe)"
-
       # detect color support
       if tput setaf 1 &>/dev/null; then
           color_prompt=yes
