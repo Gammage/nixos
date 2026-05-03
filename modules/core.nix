@@ -32,8 +32,8 @@
         };
     
 
-    time.timeZone = "America/New_York";
-    i18n.defaultLocale = "en_US.UTF-8";
+    time.timeZone = "Europe/London";
+    i18n.defaultLocale = "en_GB.UTF-8";
 
     networking.hostName = hostname;
     networking.networkmanager.enable = true;

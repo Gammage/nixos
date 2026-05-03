@@ -1,7 +1,7 @@
 { self, inputs, ... }:
 let
   username = "ben";
-  hostname = "laptop";
+  hostname = "desktop";
   addr = "${username}@${hostname}";
   system = "x86_64-linux";
   systemStateVersion = "25.11";
@@ -16,21 +16,27 @@ in {
       
       {
         boot.loader = {
-  	  systemd-boot.enable = true;
-  	  efi.canTouchEfiVariables = true;
- 	};
+	  systemd-boot.enable = true;
+	  efi.canTouchEfiVariables = true;
+	};
       
         nixpkgs.hostPlatform.system = system;
         system.stateVersion = systemStateVersion;
+        
+        hardware.graphics = {
+          enable = true;
+          enable32Bit = true;
+        };
       }
       
       {
         environment.systemPackages = with pkgs; [
+          steam
           discord
         ];
       }
 
-	./_nix/hardware-configuration.nix
+	./_nix/hardware-configuration.nix	
     ];
   };
 
@@ -39,30 +45,17 @@ in {
 
     extraSpecialArgs = {
       inherit username hostname;
-      # strip out `self` to avoid infinite recursion
       inputs = builtins.removeAttrs inputs [ "self" ];
     };
 
     modules = with self.modules.homeManager; [
 
       {
-
         home.username = username;
         home.homeDirectory = "/home/${username}";
         home.packages = [
-          # inputs.nixvim.packages.${system}.default
         ];
-
-        # This value determines the home Manager release that your
-        # configuration is compatible with. This helps avoid breakage
-        # when a new home Manager release introduces backwards
-        # incompatible changes.
-        #
-        # You can update home Manager without changing this value. See
-        # the home Manager release notes for a list of state version
-        # changes in each release.
         home.stateVersion = "24.11";
-
       }
 
       tmux

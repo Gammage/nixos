@@ -11,6 +11,7 @@
     nodejs
     live-server
     home-manager
+    google-chrome
   ];
 
 
