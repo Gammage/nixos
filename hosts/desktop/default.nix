@@ -13,6 +13,7 @@ in {
       openssh
       users
       programs
+      discord
       
       {
         boot.loader = {
@@ -29,10 +30,10 @@ in {
         };
       }
       
+      { pkgs, ... }:
       {
         environment.systemPackages = with pkgs; [
           steam
-          discord
         ];
       }
 

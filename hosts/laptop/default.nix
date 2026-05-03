@@ -13,6 +13,7 @@ in {
       openssh
       users
       programs
+      discord
       
       {
         boot.loader = {
@@ -22,12 +23,6 @@ in {
       
         nixpkgs.hostPlatform.system = system;
         system.stateVersion = systemStateVersion;
-      }
-      
-      {
-        environment.systemPackages = with pkgs; [
-          discord
-        ];
       }
 
 	./_nix/hardware-configuration.nix
