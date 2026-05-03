@@ -34,7 +34,7 @@ in {
         environment.systemPackages = with pkgs; [
           steam
         ];
-      }),
+      })
 
 	./_nix/hardware-configuration.nix	
     ];
