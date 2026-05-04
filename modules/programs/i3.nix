@@ -1,5 +1,6 @@
 { flake.modules.homeManager.i3 = { pkgs, ... }: {
-  xsession.enable = true;
+  xsession.enable = false;
+  home.packages = with pkgs; [ dmenu i3 i3status ];
   xsession.windowManager.i3 = {
     enable = true;
     config = {

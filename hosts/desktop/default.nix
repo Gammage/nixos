@@ -33,8 +33,14 @@ in {
       ({ pkgs, ... }: {
         environment.systemPackages = with pkgs; [
           steam
+          xorg.xinit
         ];
       })
+
+      {
+        services.xserver.displayManager.lightdm.enable = false;
+        services.getty.autologinUser = "ben";
+      }
 
 	./_nix/hardware-configuration.nix	
     ];
@@ -59,12 +65,22 @@ in {
         home.stateVersion = "24.11";
       })
 
+      ({ pkgs, ... }: {
+        home.file.".bash_profile".text = ''
+          if [ "$(tty)" = "/dev/tty1" ]; then
+            exec startx
+          fi
+        '';
+        home.file.".xinitrc".text = ''
+          exec i3
+        '';
+      })
+
       tmux
       neovim
       bash
       wezterm
       opencode
-      xfce
       git
       i3
 
