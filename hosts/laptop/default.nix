@@ -68,6 +68,7 @@ in {
       opencode
       xfce
       git
+      i3
 
     ];
   };
