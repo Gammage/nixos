@@ -1,18 +1,16 @@
 { flake.modules.homeManager.i3 = { pkgs, ... }: {
-  xsession.enable = false;
   home.packages = with pkgs; [ dmenu i3 i3status ];
-  xsession.windowManager.i3 = {
-    enable = true;
-    config = {
-      modifier = "Mod4";
-      terminal = "wezterm";
-      keybindings = {
-        "$mod+d" = "exec dmenu_run";
-        "$mod+Return" = "exec wezterm";
-        "$mod+Shift+q" = "kill";
-        "$mod+Shift+e" = "exec i3-msg exit";
-      };
-      bars = [{ statusCommand = "${pkgs.i3status}/bin/i3status"; }];
-    };
-  };
+  home.file.".config/i3/config".text = ''
+    set $mod Mod4
+    terminal wezterm
+
+    bindsym $mod+d exec dmenu_run
+    bindsym $mod+Return exec wezterm
+    bindsym $mod+Shift+q kill
+    bindsym $mod+Shift+e exec i3-msg exit
+
+    bar {
+      status_command ${pkgs.i3status}/bin/i3status
+    }
+  '';
 }; }

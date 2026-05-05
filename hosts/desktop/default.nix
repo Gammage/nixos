@@ -39,8 +39,7 @@ in {
 
       {
         services.xserver.enable = true;
-        services.xserver.displayManager.lightdm.enable = true;
-        services.xserver.windowManager.i3.enable = true;
+        services.xserver.displayManager.lightdm.enable = false;
         services.getty.autologinUser = "ben";
       }
 
