@@ -3,6 +3,12 @@ bindsym Mod4+Return exec wezterm
 bindsym Mod4+Shift+q kill
 bindsym Mod4+Shift+e exec i3-msg exit
 
+# change focus
+bindsym Mod4+h focus left
+bindsym Mod4+j focus down
+bindsym Mod4+k focus up
+bindsym Mod4+l focus right
+
 bar {
   status_command i3status
 }
