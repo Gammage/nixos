@@ -14,6 +14,7 @@ bindsym Mod4+d exec dmenu_run
 bindsym Mod4+Return exec wezterm
 bindsym Mod4+Shift+q kill
 bindsym Mod4+Shift+e exec i3-msg exit
+bindsym Mod4+Control+r exec i3-msg exit
 
 # ------------------------------------------------------------------------------
 # # Notes: Vim-Style Focus Movement (hjkl)

@@ -44,6 +44,9 @@
       alias ll='ls -alF --color=auto'
       alias la='ls -A --color=auto'
       alias l='ls -CF --color=auto'
+      alias reload='i3-msg reload'
+      alias rehome='home-manager switch --flake ~/nixos#ben@$(hostname)'
+      alias rebuild='sudo nixos-rebuild switch --flake ~/nixos#$(hostname)'
     '';
   };
 
