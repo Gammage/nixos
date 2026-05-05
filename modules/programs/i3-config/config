@@ -1,13 +1,76 @@
+# ------------------------------------------------------------------------------
+# # Notes: Workspace to Monitor Assignment
+# Assign workspaces 1-3 to left/main/right monitors as requested
+# Monitors (from xrandr):
+# - Left (Workspace 1): DP-1 (1920x1080+0+0)
+# - Main/Primary (Workspace 2): DP-2 (1920x1080+1920+0)
+# - Right (Workspace 3): HDMI-1 (1920x1080+3840+0)
+# ------------------------------------------------------------------------------
+workspace 1 output DP-1  # Workspace 1 → Left monitor
+workspace 2 output DP-2  # Workspace 2 → Main/Primary monitor
+workspace 3 output HDMI-1 # Workspace 3 → Right monitor
+
 bindsym Mod4+d exec dmenu_run
 bindsym Mod4+Return exec wezterm
 bindsym Mod4+Shift+q kill
 bindsym Mod4+Shift+e exec i3-msg exit
 
-# change focus
-bindsym Mod4+h focus left
-bindsym Mod4+j focus down
-bindsym Mod4+k focus up
-bindsym Mod4+l focus right
+# ------------------------------------------------------------------------------
+# # Notes: Workspace Switching & Moving Keybindings
+# Mod4+<number> switches to workspace <number>
+# Mod4+Shift+<number> moves focused window to workspace <number>
+# Includes 1-9 for full workspace range, truncate if only 1-3 needed
+# ------------------------------------------------------------------------------
+# Switch to workspace (Mod4+<number>)
+bindsym Mod4+1 workspace number 1
+
+# ------------------------------------------------------------------------------
+# # Notes: Tmux-Style Launch Mode (Mod4+space as leader)
+# Press Mod4+space to enter mode, then press h to open Firefox on left monitor
+# Visual indicator: i3-nagbar shows mode hint, auto-closes after 1.5s
+# Press Escape/Return/space to exit mode without action
+# ------------------------------------------------------------------------------
+mode "launch" {
+    # h: Open Firefox on left monitor (DP-1)
+    bindsym h focus output DP-1; exec firefox; mode "default"
+
+    # Exit mode keys
+    bindsym Escape mode "default"
+    bindsym Return mode "default"
+    bindsym space mode "default"
+}
+
+# Enter launch mode with Mod4+space + show visual indicator
+bindsym Mod4+space mode "launch"; exec --no-startup-id i3-nagbar -m "Launch Mode: [h] Firefox (left)" -t warning -timeout 1.5
+# ------------------------------------------------------------------------------
+# # Notes: Temporarily Disabled Keybindings
+# Mod4+2 and Mod4+3 commented out for testing as requested
+# Uncomment later to re-enable workspace switching for monitors 2/3
+# ------------------------------------------------------------------------------
+# bindsym Mod4+2 workspace number 2
+# bindsym Mod4+3 workspace number 3
+bindsym Mod4+4 workspace number 4
+bindsym Mod4+5 workspace number 5
+bindsym Mod4+6 workspace number 6
+bindsym Mod4+7 workspace number 7
+bindsym Mod4+8 workspace number 8
+bindsym Mod4+9 workspace number 9
+
+# Move focused window to workspace (Mod4+Shift+<number>)
+bindsym Mod4+Shift+1 move container to workspace number 1
+# ------------------------------------------------------------------------------
+# # Notes: Temporarily Disabled Move Keybindings
+# Mod4+Shift+2 and Mod4+Shift+3 commented out to match switch key disable
+# Uncomment later to re-enable moving windows to workspaces 2/3
+# ------------------------------------------------------------------------------
+# bindsym Mod4+Shift+2 move container to workspace number 2
+# bindsym Mod4+Shift+3 move container to workspace number 3
+bindsym Mod4+Shift+4 move container to workspace number 4
+bindsym Mod4+Shift+5 move container to workspace number 5
+bindsym Mod4+Shift+6 move container to workspace number 6
+bindsym Mod4+Shift+7 move container to workspace number 7
+bindsym Mod4+Shift+8 move container to workspace number 8
+bindsym Mod4+Shift+9 move container to workspace number 9
 
 bar {
   status_command i3status
