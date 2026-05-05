@@ -1,8 +1,0 @@
-bindsym Mod1+d exec dmenu_run
-bindsym Mod1+Return exec wezterm
-bindsym Mod1+Shift+q kill
-bindsym Mod1+Shift+e exec i3-msg exit
-
-bar {
-  status_command i3status
-}
