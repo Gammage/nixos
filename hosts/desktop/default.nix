@@ -37,30 +37,12 @@ in {
         ];
       })
 
-      ({ lib, ... }: {
-        services.xserver.enable = true;
-        services.xserver.displayManager.lightdm.enable = lib.mkForce false;
-        services.getty.autologinUser = "ben";
-      })
-
-      ({ pkgs, ... }: {
-        services.xserver.windowManager.i3 = {
-          enable = true;
-          config = {
-            modifier = "Mod1";
-            terminal = "wezterm";
-            keybindings = {
-              "Mod1+d" = "exec dmenu_run";
-              "Mod1+Return" = "exec wezterm";
-              "Mod1+Shift+q" = "kill";
-              "Mod1+Shift+e" = "exec i3-msg exit";
-            };
-            bars = [{
-              statusCommand = "${pkgs.i3status}/bin/i3status";
-            }];
-          };
-        };
-      })
+       ({ lib, ... }: {
+         services.xserver.enable = true;
+         services.xserver.displayManager.lightdm.enable = lib.mkForce false;
+         services.xserver.windowManager.i3.enable = true;
+         services.getty.autologinUser = "ben";
+       })
 
 	./_nix/hardware-configuration.nix	
     ];
@@ -96,14 +78,15 @@ in {
         '';
       })
 
-       tmux
-       neovim
-       bash
-       wezterm
-       opencode
-       git
+        tmux
+        neovim
+        bash
+        wezterm
+        opencode
+        git
+        i3
 
-     ];
+      ];
   };
 
 }
