@@ -30,18 +30,17 @@ in {
         };
       }
       
-      ({ pkgs, ... }: {
-        environment.systemPackages = with pkgs; [
-          steam
-          xorg.xinit
-        ];
-      })
+       ({ pkgs, ... }: {
+         environment.systemPackages = with pkgs; [
+           steam
+         ];
+       })
 
        ({ lib, ... }: {
-         services.xserver.enable = true;
-         services.xserver.displayManager.lightdm.enable = lib.mkForce false;
          services.xserver.windowManager.i3.enable = true;
-         services.getty.autologinUser = "ben";
+         services.xserver.displayManager.lightdm.autoLogin.enable = true;
+         services.xserver.displayManager.lightdm.autoLogin.user = "ben";
+          services.xserver.displayManager.defaultSession = "none+i3";
        })
 
 	./_nix/hardware-configuration.nix	
@@ -67,16 +66,8 @@ in {
         home.stateVersion = "24.11";
       })
 
-      ({ pkgs, ... }: {
-        home.file.".bash_profile".text = ''
-          if [ "$(tty)" = "/dev/tty1" ]; then
-            exec startx
-          fi
-        '';
-        home.file.".xinitrc".text = ''
-          exec i3
-        '';
-      })
+       ({ pkgs, ... }: {
+       })
 
         tmux
         neovim
