@@ -2,7 +2,6 @@
   
   users.users.${username} = {
     isNormalUser = true;
-    mutableUsers = true;
     extraGroups = [ "wheel" ];
     openssh.authorizedKeys.keys = [
       # ben@desktop public key: allows desktop → any host SSH access
