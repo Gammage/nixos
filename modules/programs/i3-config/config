@@ -16,6 +16,15 @@ bindsym Mod4+Shift+q kill
 bindsym Mod4+Shift+e exec i3-msg exit
 
 # ------------------------------------------------------------------------------
+# # Notes: Vim-Style Focus Movement (hjkl)
+# Mod4+h/j/k/l moves focus between windows (like vim navigation)
+# ------------------------------------------------------------------------------
+bindsym Mod4+h focus left
+bindsym Mod4+j focus down
+bindsym Mod4+k focus up
+bindsym Mod4+l focus right
+
+# ------------------------------------------------------------------------------
 # # Notes: Workspace Switching & Moving Keybindings
 # Mod4+<number> switches to workspace <number>
 # Mod4+Shift+<number> moves focused window to workspace <number>
