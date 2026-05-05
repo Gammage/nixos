@@ -37,11 +37,11 @@ in {
         ];
       })
 
-      {
+      ({ lib, ... }: {
         services.xserver.enable = true;
-        services.xserver.displayManager.lightdm.enable = false;
+        services.xserver.displayManager.lightdm.enable = lib.mkForce false;
         services.getty.autologinUser = "ben";
-      }
+      })
 
 	./_nix/hardware-configuration.nix	
     ];
