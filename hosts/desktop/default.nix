@@ -38,7 +38,9 @@ in {
       })
 
       {
-        services.xserver.displayManager.lightdm.enable = false;
+        services.xserver.enable = true;
+        services.xserver.displayManager.lightdm.enable = true;
+        services.xserver.windowManager.i3.enable = true;
         services.getty.autologinUser = "ben";
       }
 
@@ -82,7 +84,6 @@ in {
       wezterm
       opencode
       git
-      i3
 
     ];
   };

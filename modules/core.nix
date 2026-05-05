@@ -22,7 +22,7 @@
     
     services.xserver = {
         enable = true;
-        displayManager.lightdm.enable = false;
+        displayManager.lightdm.enable = true;
 
         xkb = {
             layout = "gb";
