@@ -1,7 +1,7 @@
 { flake.modules.homeManager.i3 = { pkgs, ... }: {
   home.packages = with pkgs; [ dmenu i3 i3status ];
   home.file.".config/i3/config".text = ''
-    set $mod Mod4
+    set $mod Mod1
     terminal wezterm
 
     bindsym $mod+d exec dmenu_run
