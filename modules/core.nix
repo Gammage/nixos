@@ -26,7 +26,7 @@
 
         xkb = {
             layout = "gb";
-            options = "";
+            options = "altwin:super_win";
             };
         };
     

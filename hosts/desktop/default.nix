@@ -84,6 +84,7 @@ in {
       wezterm
       opencode
       git
+      i3
 
     ];
   };
