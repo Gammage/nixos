@@ -46,8 +46,9 @@
       alias l='ls -CF --color=auto'
       alias reload='i3-msg reload'
       alias rehome='home-manager switch --flake ~/nixos#ben@$(hostname)'
-      alias rebuild='sudo nixos-rebuild switch --flake ~/nixos#$(hostname)'
-    '';
+       alias rebuild='sudo nixos-rebuild switch --flake ~/nixos#$(hostname)'
+       alias shutdown='sudo systemctl poweroff'
+     '';
   };
 
   programs.fzf.enable = true;
