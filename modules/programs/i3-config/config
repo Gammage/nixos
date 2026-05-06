@@ -51,12 +51,13 @@ bindsym $mod+l focus right
 # Switch to workspace ($mod+<number>)
 
 set $workspace1 "1: Browser"
+set $workspace2 "2: Discord"
 set $workspace9 "9: Spotify"
 
-
-# $mod+1 opens Chrome on workspace 1 (left monitor DP-1)
-bindsym $mod+1 workspace $workspace1; exec google-chrome
-bindsym $mod+2 workspace number 2
+# $mod+1 opens Chrome on workspace 1 (left monitor DP-1) if not already running
+bindsym $mod+1 workspace $workspace1; exec --no-startup-id bash -c 'pgrep -x google-chrome > /dev/null || google-chrome'
+# $mod+2 opens Discord on workspace 2 (left monitor DP-1)
+bindsym $mod+2 workspace $workspace2; exec discord
 bindsym $mod+3 workspace number 3
 bindsym $mod+4 workspace number 4
 bindsym $mod+5 workspace number 5
@@ -67,7 +68,7 @@ bindsym $mod+9 workspace number 9; exec spotify
 
 # Move focused window to workspace ($mod+Shift+<number>)
 bindsym $mod+Shift+1 move container to workspace $workspace1
-bindsym $mod+Shift+2 move container to workspace number 2
+bindsym $mod+Shift+2 move container to workspace $workspace2
 bindsym $mod+Shift+3 move container to workspace number 3
 bindsym $mod+Shift+4 move container to workspace number 4
 bindsym $mod+Shift+5 move container to workspace number 5
