@@ -12,6 +12,7 @@
     live-server
     home-manager
     google-chrome
+    spotify
   ];
 
 
