@@ -52,26 +52,29 @@ bindsym $mod+l focus right
 
 set $workspace1 "1: Browser"
 set $workspace2 "2: Discord"
+set $workspace5 "5: work"
 set $workspace9 "9: Spotify"
 
-# $mod+1 opens Chrome on workspace 1 (left monitor DP-1) if not already running
-bindsym $mod+1 workspace $workspace1; exec --no-startup-id bash -c 'pgrep -x google-chrome > /dev/null || google-chrome'
+# $mod+1 switches to workspace 1 (left monitor DP-1)
+bindsym $mod+1 workspace $workspace1
 # $mod+2 opens Discord on workspace 2 (left monitor DP-1)
 bindsym $mod+2 workspace $workspace2; exec discord
 bindsym $mod+3 workspace number 3
 bindsym $mod+4 workspace number 4
-bindsym $mod+5 workspace number 5
+# $mod+5 opens WezTerm with tmux on workspace 5 (main monitor DP-2)
+bindsym $mod+5 workspace number 5; exec wezterm
 bindsym $mod+6 workspace number 6
 bindsym $mod+7 workspace number 7
 bindsym $mod+8 workspace number 8
 bindsym $mod+9 workspace number 9; exec spotify
 
 # Move focused window to workspace ($mod+Shift+<number>)
-bindsym $mod+Shift+1 move container to workspace $workspace1
+# $mod+Shift+1 opens Chrome on workspace 1 if not already running
+bindsym $mod+Shift+1 exec --no-startup-id bash -c 'pgrep -x google-chrome > /dev/null || google-chrome'
 bindsym $mod+Shift+2 move container to workspace $workspace2
 bindsym $mod+Shift+3 move container to workspace number 3
 bindsym $mod+Shift+4 move container to workspace number 4
-bindsym $mod+Shift+5 move container to workspace number 5
+bindsym $mod+Shift+5 move container to workspace $workspace5
 bindsym $mod+Shift+6 move container to workspace number 6
 bindsym $mod+Shift+7 move container to workspace number 7
 bindsym $mod+Shift+8 move container to workspace number 8
@@ -79,6 +82,7 @@ bindsym $mod+Shift+9 move container to workspace number 9
 
 assign [class="Google-chrome"] $workspace1
 assign [class="Spotify"] $workspace9
+assign [class="WezTerm"] $workspace5
 
 bar {
   status_command i3status
