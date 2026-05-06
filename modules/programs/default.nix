@@ -13,6 +13,7 @@
     home-manager
     google-chrome
     spotify
+    arandr
   ];
 
 
