@@ -82,7 +82,7 @@ bindsym $mod+Shift+9 move container to workspace number 9
 
 assign [class="Google-chrome"] $workspace1
 assign [class="Spotify"] $workspace9
-assign [class="WezTerm"] $workspace5
+assign [class="org.wezfurlong.wezterm"] $workspace5
 
 bar {
   status_command i3status
