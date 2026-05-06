@@ -7,4 +7,10 @@
     source = ./i3-config/notes_station.sh;
     executable = true;
   };
+
+  # Script to open Chrome with Google Drive
+  home.file.".local/bin/drive" = {
+    source = ./i3-config/drive.sh;
+    executable = true;
+  };
 }; }
