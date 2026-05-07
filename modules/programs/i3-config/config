@@ -48,21 +48,28 @@ bindsym $mod+k focus up
 bindsym $mod+l focus right
 
 # ----------------------------
+# WORKSPACE ASSIGNMENTS
+# ----------------------------
+assign [class="google-chrome"] $ws1
+assign [class="discord"]       $ws2
+assign [class="Spotify"]       $ws9
+
+# ----------------------------
 # WORKSPACE SWITCH + APP LAUNCH
 # ----------------------------
 
 bindsym $mod+1 workspace $ws1
-bindsym $mod+2 workspace $ws2; exec discord
+bindsym $mod+2 workspace $ws2
 bindsym $mod+3 workspace $ws3
 
-bindsym $mod+4 workspace $ws4; exec --no-startup-id ~/.local/bin/notes_station
-bindsym $mod+5 workspace $ws5; exec wezterm
+bindsym $mod+4 workspace $ws4
+bindsym $mod+5 workspace $ws5
 
 bindsym $mod+6 workspace $ws6; exec google-chrome --new-window "https://drive.google.com"
 
 bindsym $mod+7 workspace $ws7
 bindsym $mod+8 workspace $ws8
-bindsym $mod+9 workspace $ws9; exec spotify
+bindsym $mod+9 workspace $ws9
 
 # ----------------------------
 # MOVE WINDOWS
