@@ -51,7 +51,7 @@ bindsym $mod+l focus right
 # WORKSPACE SWITCH + APP LAUNCH
 # ----------------------------
 
-bindsym $mod+1 workspace $ws1; exec google-chrome --new-window
+bindsym $mod+1 workspace $ws1
 bindsym $mod+2 workspace $ws2; exec discord
 bindsym $mod+3 workspace $ws3
 
