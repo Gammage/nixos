@@ -1,8 +1,16 @@
 {
-  flake.modules.nixos.core = { hostname, ... }: {
+  flake.modules.nixos.core = { pkgs, hostname, ... }: {
     
     nix.settings.experimental-features = [ "nix-command" "flakes" ];
     nixpkgs.config.allowUnfree = true;
+
+    # Make libstdc++.so.6 findable for pip/uv installed Python packages (e.g. numpy)
+    environment.sessionVariables = {
+      LD_LIBRARY_PATH = with pkgs; [
+        "${stdenv.cc.cc.lib}/lib"
+        "${zlib}/lib"
+      ];
+    };
     
     # Audio (PipeWire)
     security.rtkit.enable = true;
