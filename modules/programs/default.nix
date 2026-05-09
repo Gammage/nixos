@@ -8,6 +8,8 @@
     wget
     ripgrep
     python3
+    uv
+    unzip
     nodejs
     live-server
     home-manager

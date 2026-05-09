@@ -63,7 +63,6 @@ in {
         home.homeDirectory = "/home/${username}";
         home.packages = [
           pkgs.nerd-fonts.hurmit
-          pkgs.uv
         ];
         home.stateVersion = "24.11";
       })
