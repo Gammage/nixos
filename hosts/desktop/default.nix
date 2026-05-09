@@ -64,6 +64,9 @@ in {
         home.packages = [
           pkgs.nerd-fonts.hurmit
         ];
+        home.sessionVariables = {
+          LD_LIBRARY_PATH = "${pkgs.stdenv.cc.cc.lib}/lib:${pkgs.zlib}/lib";
+        };
         home.stateVersion = "24.11";
       })
 
