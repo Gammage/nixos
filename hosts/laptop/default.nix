@@ -76,6 +76,7 @@ in {
         home.file.".config/i3".source = ../../modules/programs/i3-config-laptop;
       })
       git
+      chrome
 
     ];
   };

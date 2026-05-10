@@ -80,6 +80,7 @@ in {
         opencode
         git
         i3
+        chrome
 
       ];
   };
