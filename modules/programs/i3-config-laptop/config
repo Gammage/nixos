@@ -1,0 +1,75 @@
+# ----------------------------
+# MOD KEY
+# ----------------------------
+set $mod Mod4
+
+# ----------------------------
+# WORKSPACES
+# ----------------------------
+set $ws1 "1: Browser"
+set $ws2 "2: Discord"
+set $ws3 "3"
+set $ws4 "4: Notes"
+set $ws5 "5: Work"
+set $ws6 "6: Drive"
+set $ws7 "7"
+set $ws8 "8"
+set $ws9 "9: Spotify"
+
+# ----------------------------
+# BASIC CONTROLS
+# ----------------------------
+bindsym $mod+d exec dmenu_run
+bindsym $mod+Return exec wezterm
+bindsym $mod+Shift+q kill
+bindsym $mod+Shift+e exec i3-msg exit
+bindsym $mod+Control+r reload
+
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+
+# ----------------------------
+# WORKSPACE ASSIGNMENTS
+# ----------------------------
+assign [class="discord"]       $ws2
+assign [class="Spotify"]       $ws9
+
+# ----------------------------
+# WORKSPACE SWITCH + APP LAUNCH
+# ----------------------------
+
+bindsym $mod+1 workspace $ws1
+bindsym $mod+2 workspace $ws2
+bindsym $mod+3 workspace $ws3
+
+bindsym $mod+4 workspace $ws4
+bindsym $mod+5 workspace $ws5
+
+bindsym $mod+6 workspace $ws6
+
+bindsym $mod+7 workspace $ws7
+bindsym $mod+8 workspace $ws8
+bindsym $mod+9 workspace $ws9
+
+# ----------------------------
+# MOVE WINDOWS
+# ----------------------------
+bindsym $mod+Shift+1 move container to workspace $ws1
+bindsym $mod+Shift+2 move container to workspace $ws2
+bindsym $mod+Shift+3 move container to workspace $ws3
+bindsym $mod+Shift+4 move container to workspace $ws4
+bindsym $mod+Shift+5 move container to workspace $ws5
+bindsym $mod+Shift+6 move container to workspace $ws6
+bindsym $mod+Shift+7 move container to workspace $ws7
+bindsym $mod+Shift+8 move container to workspace $ws8
+bindsym $mod+Shift+9 move container to workspace $ws9
+
+# ----------------------------
+# BAR
+# ----------------------------
+bar {
+    status_command i3status
+    position bottom
+}

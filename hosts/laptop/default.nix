@@ -14,12 +14,17 @@ in {
       users
       programs
       discord
-      
+
+      ({ lib, ... }: {
+        services.xserver.windowManager.i3.enable = true;
+        services.xserver.displayManager.defaultSession = "none+i3";
+      })
+
       {
         boot.loader = {
   	  systemd-boot.enable = true;
   	  efi.canTouchEfiVariables = true;
- 	};
+	};
       
         nixpkgs.hostPlatform.system = system;
         system.stateVersion = systemStateVersion;
@@ -66,7 +71,10 @@ in {
       bash
       wezterm
       opencode
-      xfce
+      ({ pkgs, ... }: {
+        home.packages = with pkgs; [ dmenu i3 i3status ];
+        home.file.".config/i3".source = ../../modules/programs/i3-config-laptop;
+      })
       git
 
     ];
