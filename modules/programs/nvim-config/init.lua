@@ -1064,6 +1064,7 @@ require("lazy").setup({
 		"benlubas/molten-nvim",
 		build = ":UpdateRemotePlugins",
 		init = function()
+			vim.g.python3_host_prog = vim.fn.expand("~/.venv/molten/bin/python3")
 			vim.g.molten_python_path = vim.fn.expand("~/.venv/molten/bin/python3")
 			vim.g.molten_output_win_max_height = 20
 		end,
