@@ -12,6 +12,7 @@
     unzip
     nodejs
     live-server
+    localsend
     home-manager
     google-chrome
     spotify
