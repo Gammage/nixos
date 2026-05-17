@@ -13,6 +13,7 @@ in {
       openssh
       users
       programs
+      localsend
       discord
       
       {
