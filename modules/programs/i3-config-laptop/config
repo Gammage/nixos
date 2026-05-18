@@ -6,15 +6,15 @@ set $mod Mod4
 # ----------------------------
 # WORKSPACES
 # ----------------------------
-set $ws1 "1: Browser"
-set $ws2 "2: Discord"
+set $ws1 "1"
+set $ws2 "2"
 set $ws3 "3"
-set $ws4 "4: Notes"
-set $ws5 "5: Work"
-set $ws6 "6: Drive"
+set $ws4 "4"
+set $ws5 "5"
+set $ws6 "6"
 set $ws7 "7"
 set $ws8 "8"
-set $ws9 "9: Spotify"
+set $ws9 "9"
 
 # ----------------------------
 # BASIC CONTROLS
