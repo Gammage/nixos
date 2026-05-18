@@ -313,6 +313,13 @@ require("lazy").setup({
 		},
 		opts = {},
 	},
+	{
+		"MeanderingProgrammer/render-markdown.nvim",
+		dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-mini/mini.nvim" },
+		---@module "render-markdown"
+		---@type render.md.UserConfig
+		opts = {},
+	},
 	-- NOTE: Plugins can also be added by using a table,
 	-- with the first argument being the link and the following
 	-- keys can be used to configure plugin behavior/loading/etc.
