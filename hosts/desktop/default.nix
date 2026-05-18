@@ -81,6 +81,7 @@ in {
 
         tmux
         neovim
+        moltenPython
         bash
         wezterm
         opencode
