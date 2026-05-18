@@ -15,7 +15,11 @@ in {
       programs
       localsend
       discord
-      
+
+      ({ pkgs, ... }: {
+        environment.systemPackages = [ pkgs.android-tools ];
+      })
+
       {
         boot.loader = {
 	  systemd-boot.enable = true;
