@@ -1073,7 +1073,7 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>me", ":MoltenEvaluateOperator<CR>", { desc = "[M]olten [E]valuate (motion)" })
 			vim.keymap.set("n", "<leader>ml", ":MoltenEvaluateLine<CR>", { desc = "[M]olten evaluate [L]ine" })
 			vim.keymap.set("v", "<leader>mv", ":MoltenEvaluateVisual<CR>", { desc = "[M]olten evaluate [V]isual" })
-			vim.keymap.set("n", "<leader>mr", ":MoltenReevaluateCell<CR>", { desc = "[M]olten [R]evaluate cell" })
+			vim.keymap.set("n", "<leader>mr", ":MoltenEvaluateCell<CR>", { desc = "[M]olten evaluate [R] cell" })
 			vim.keymap.set("n", "<leader>mo", ":MoltenShowOutput<CR>", { desc = "[M]olten [O]utput" })
 		end,
 	},
