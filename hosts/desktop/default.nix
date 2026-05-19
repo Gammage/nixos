@@ -69,6 +69,7 @@ in {
         home.homeDirectory = "/home/${username}";
         home.packages = [
           pkgs.nerd-fonts.hurmit
+          pkgs.quarto
         ];
         home.sessionVariables = {
           LD_LIBRARY_PATH = "${pkgs.stdenv.cc.cc.lib}/lib:${pkgs.zlib}/lib";
