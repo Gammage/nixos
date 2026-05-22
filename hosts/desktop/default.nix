@@ -32,16 +32,20 @@ in {
         hardware.graphics = {
           enable = true;
           enable32Bit = true;
+          extraPackages = with pkgs; [
+            rocmPackages.clr.icd
+          ];
         };
       }
       
        ({ pkgs, ... }: {
          environment.systemPackages = with pkgs; [
-           steam
-           gimp
-           davinci-resolve
-         ];
-       })
+            steam
+            gimp
+            davinci-resolve
+            clinfo
+          ];
+        })
 
        ({ lib, ... }: {
          services.xserver.windowManager.i3.enable = true;
