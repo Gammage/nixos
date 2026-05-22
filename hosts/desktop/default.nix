@@ -44,6 +44,7 @@ in {
             gimp
             davinci-resolve
             clinfo
+            ffmpeg
           ];
         })
 
