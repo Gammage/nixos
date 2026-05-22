@@ -20,23 +20,23 @@ in {
         environment.systemPackages = [ pkgs.android-tools ];
       })
 
-      {
+      ({ pkgs, ... }: {
         boot.loader = {
 	  systemd-boot.enable = true;
 	  efi.canTouchEfiVariables = true;
 	};
-      
-        nixpkgs.hostPlatform.system = system;
-        system.stateVersion = systemStateVersion;
-        
-        hardware.graphics = {
-          enable = true;
-          enable32Bit = true;
-          extraPackages = with pkgs; [
-            rocmPackages.clr.icd
-          ];
-        };
-      }
+       
+         nixpkgs.hostPlatform.system = system;
+         system.stateVersion = systemStateVersion;
+         
+         hardware.graphics = {
+           enable = true;
+           enable32Bit = true;
+           extraPackages = with pkgs; [
+             rocmPackages.clr.icd
+           ];
+         };
+       })
       
        ({ pkgs, ... }: {
          environment.systemPackages = with pkgs; [
