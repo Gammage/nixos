@@ -264,6 +264,7 @@ rtp:prepend(lazypath)
 require("lazy").setup({
 	-- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
 	"NMAC427/guess-indent.nvim", -- Detect tabstop and shiftwidth automatically
+  "n-sweep/telemux-nvim",
 	{
 		"stevearc/oil.nvim",
 		opts = {
@@ -1067,22 +1068,9 @@ require("lazy").setup({
 		--    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
 	},
 
-	{ -- Jupyter notebook integration
-		"benlubas/molten-nvim",
-		build = ":UpdateRemotePlugins",
-		init = function()
-			vim.g.python3_host_prog = vim.fn.expand("~/.venv/molten/bin/python3")
-			vim.g.molten_python_path = vim.fn.expand("~/.venv/molten/bin/python3")
-			vim.g.molten_output_win_max_height = 20
-		end,
-		config = function()
-			vim.keymap.set("n", "<leader>mi", ":MoltenInit<CR>", { desc = "[M]olten [I]nit kernel" })
-			vim.keymap.set("n", "<leader>me", ":MoltenEvaluateOperator<CR>", { desc = "[M]olten [E]valuate (motion)" })
-			vim.keymap.set("n", "<leader>ml", ":MoltenEvaluateLine<CR>", { desc = "[M]olten evaluate [L]ine" })
-			vim.keymap.set("v", "<leader>mv", ":MoltenEvaluateVisual<CR>", { desc = "[M]olten evaluate [V]isual" })
-			vim.keymap.set("n", "<leader>mr", ":MoltenReevaluateCell<CR>", { desc = "[M]olten [R]evaluate cell" })
-			vim.keymap.set("n", "<leader>mo", ":MoltenShowOutput<CR>", { desc = "[M]olten [O]utput" })
-		end,
+	{
+    "GCBallesteros/jupytext.nvim",
+    config = true,
 	},
 
 	-- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the

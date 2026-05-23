@@ -16,20 +16,23 @@ in {
       localsend
       discord
 
-      ({ pkgs, ... }: {
-        environment.systemPackages = [ pkgs.android-tools ];
-      })
-
-      ({ pkgs, ... }: {
+      ({ pkgs, ...}: {
+       environment.systemPackages = with pkgs; [
+          steam
+          gimp
+          davinci-resolve
+          clinfo
+          ffmpeg
+          android-tools
+        ];
         boot.loader = {
-	  systemd-boot.enable = true;
-	  efi.canTouchEfiVariables = true;
-	};
-       
-         nixpkgs.hostPlatform.system = system;
-         system.stateVersion = systemStateVersion;
+          systemd-boot.enable = true;
+          efi.canTouchEfiVariables = true;
+        };
+        nixpkgs.hostPlatform.system = system;
+        system.stateVersion = systemStateVersion;
          
-         hardware.graphics = {
+        hardware.graphics = {
            enable = true;
            enable32Bit = true;
            extraPackages = with pkgs; [
@@ -37,16 +40,6 @@ in {
            ];
          };
        })
-      
-       ({ pkgs, ... }: {
-         environment.systemPackages = with pkgs; [
-            steam
-            gimp
-            davinci-resolve
-            clinfo
-            ffmpeg
-          ];
-        })
 
        ({ lib, ... }: {
          services.xserver.windowManager.i3.enable = true;
@@ -69,7 +62,7 @@ in {
 
     modules = with self.modules.homeManager; [
 
-      ({ pkgs, ... }: {
+      ({ pkgs, ...}: {
         home.username = username;
         home.homeDirectory = "/home/${username}";
         home.packages = [
@@ -81,21 +74,15 @@ in {
         };
         home.stateVersion = "24.11";
       })
-
-       ({ pkgs, ... }: {
-       })
-
-        tmux
-        neovim
-        moltenPython
-        bash
-        wezterm
-        opencode
-        git
-        i3
-        chrome
-
-      ];
+      tmux
+      neovim
+      moltenPython
+      bash
+      wezterm
+      opencode
+      git
+      i3
+      chrome
+    ];
   };
-
 }

@@ -1,4 +1,4 @@
-{ self, inputs, ... }:
+{ self, inputs, pkgs, ... }:
 let
   username = "ben";
   hostname = "laptop";
@@ -45,15 +45,12 @@ in {
 
     modules = with self.modules.homeManager; [
 
-      ({ pkgs, ... }: {
+       {
 
         home.username = username;
+        home.packages = with pkgs; [ dmenu i3 i3status nerd-fonts.hurmit ];
+        home.file.".config/i3".source = ../../modules/programs/i3-config-laptop;
         home.homeDirectory = "/home/${username}";
-        home.packages = [
-          pkgs.nerd-fonts.hurmit
-          # inputs.nixvim.packages.${system}.default
-        ];
-
         # This value determines the home Manager release that your
         # configuration is compatible with. This helps avoid breakage
         # when a new home Manager release introduces backwards
@@ -63,18 +60,13 @@ in {
         # the home Manager release notes for a list of state version
         # changes in each release.
         home.stateVersion = "24.11";
-
-      })
+      }
 
       tmux
       neovim
       bash
       wezterm
       opencode
-      ({ pkgs, ... }: {
-        home.packages = with pkgs; [ dmenu i3 i3status ];
-        home.file.".config/i3".source = ../../modules/programs/i3-config-laptop;
-      })
       git
       chrome
 
