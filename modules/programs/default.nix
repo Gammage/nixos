@@ -3,20 +3,24 @@
   programs.firefox.enable = true;
 
   environment.systemPackages = with pkgs; [
-    git
+    arandr
     curl
-    wget
-    ripgrep
-    python3
-    uv
-    unzip
-    nodejs
+    git
+    google-chrome
+    home-manager
     live-server
     localsend
-    home-manager
-    google-chrome
+    nodejs
+    ripgrep
     spotify
-    arandr
+    unzip
+    uv
+    wget
+
+    (python3.withPackages (ps: with ps; [
+      black
+      jupytext
+    ]) )
   ];
 
 

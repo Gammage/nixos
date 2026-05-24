@@ -1,4 +1,5 @@
 {
+# NIX OS
   flake.modules.nixos.core = { pkgs, hostname, ... }: {
     
     nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -41,4 +42,8 @@
     security.sudo.wheelNeedsPassword = false;
 
   };
+# HOME - MANAGER
+#  flake.modules.homeManager.core = { ... } : {
+#    programs.home-manager.enable = true;
+#      };
 }
