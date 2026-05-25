@@ -1128,17 +1128,17 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 	group = notes_augroup,
 	pattern = { "/home/ben/notes/*", "/home/ben/notes/**/*" },
 	callback = function()
-		vim.keymap.set("n", "<leader>oo", ":Obsidian backlinks <CR>", { buffer = true })
-		vim.keymap.set("n", "<leader>ot", ":Obsidian today <CR>", { buffer = true })
-		vim.keymap.set("n", "<leader>oT", ":Obsidian today +1 <CR>", { buffer = true })
-		vim.keymap.set("n", "<leader>oy", ":Obsidian today -1 <CR>", { buffer = true })
-		vim.keymap.set("n", "<leader>os", ":Obsidian search <CR>", { buffer = true })
-		vim.keymap.set("n", "<leader>oa", ":Obsidian tags <CR>", { buffer = true })
-		vim.keymap.set("n", "<leader>oi", ":e ~/notes/index.md <CR>", { buffer = true })
-		vim.keymap.set("n", "<leader>oO", ":Obsidian open <CR>", { buffer = true })
-		vim.keymap.set("v", "os", ":Obsidian search <CR>", { buffer = true })
-		vim.keymap.set("v", "ol", ":Obsidian link <CR>", { buffer = true })
-		vim.keymap.set("v", "oL", ":Obsidian link_new <CR>", { buffer = true })
+		vim.keymap.set("n", "<leader>bo", ":Obsidian backlinks <CR>", { buffer = true })
+		vim.keymap.set("n", "<leader>bt", ":Obsidian today <CR>", { buffer = true })
+		vim.keymap.set("n", "<leader>bT", ":Obsidian today +1 <CR>", { buffer = true })
+		vim.keymap.set("n", "<leader>by", ":Obsidian today -1 <CR>", { buffer = true })
+		vim.keymap.set("n", "<leader>bs", ":Obsidian search <CR>", { buffer = true })
+		vim.keymap.set("n", "<leader>ba", ":Obsidian tags <CR>", { buffer = true })
+		vim.keymap.set("n", "<leader>bi", ":e ~/notes/index.md <CR>", { buffer = true })
+		vim.keymap.set("n", "<leader>bO", ":Obsidian open <CR>", { buffer = true })
+		vim.keymap.set("v", "bs", ":Obsidian search <CR>", { buffer = true })
+		vim.keymap.set("v", "bl", ":Obsidian link <CR>", { buffer = true })
+		vim.keymap.set("v", "bL", ":Obsidian link_new <CR>", { buffer = true })
 	end,
 })
 
