@@ -90,6 +90,7 @@
       android-tools
       clinfo
       ffmpeg
+      nixpkgs-fmt
       (python3.withPackages (ps: with ps; [ black jupytext ]))
     ];
 
