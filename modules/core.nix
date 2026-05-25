@@ -1,12 +1,12 @@
 {
-# NIX OS
+  # NIX OS
   flake.modules.nixos.core = { pkgs, username, hostname, ... }: {
 
     users.users.${username} = {
       isNormalUser = true;
       extraGroups = [ "wheel" ];
     };
-    
+
     nix.settings = {
       experimental-features = [ "nix-command" "flakes" ];
       trusted-users = [ username ];
@@ -59,12 +59,12 @@
     security.sudo.wheelNeedsPassword = false;
 
     fonts.packages = with pkgs; [
-    nerd-fonts.hurmit
+      nerd-fonts.hurmit
     ];
 
   };
 
-# HOME - MANAGER
+  # HOME - MANAGER
   flake.modules.homeManager.core = { pkgs, config, ... }: {
 
     home.stateVersion = "25.11";
@@ -72,20 +72,20 @@
     nixpkgs.config.allowUnfree = true;
 
     home.packages = with pkgs; [
-      curl 
-      ripgrep 
-      unzip 
-      uv 
+      curl
+      ripgrep
+      unzip
+      uv
       wget
-      nodejs 
+      nodejs
       live-server
-      localsend 
-      fzf 
-      coreutils 
-      bash 
+      localsend
+      fzf
+      coreutils
+      bash
       opencode
-      git 
-      tmux 
+      git
+      tmux
       neovim
       android-tools
       clinfo

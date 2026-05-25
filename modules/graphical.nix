@@ -6,6 +6,7 @@
       discord
       firefox
       gimp
+      obsidian
       google-chrome
       i3
       i3status
