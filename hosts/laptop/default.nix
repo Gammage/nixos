@@ -10,10 +10,6 @@ in {
     specialArgs = { inherit hostname username; };
     modules = with self.modules.nixos; [
       core
-      openssh
-      users
-      programs
-      discord
 
       ({ lib, ... }: {
         services.xserver.windowManager.i3.enable = true;
@@ -28,6 +24,13 @@ in {
       
         nixpkgs.hostPlatform.system = system;
         system.stateVersion = systemStateVersion;
+        
+     # Bluetooth
+      hardware.bluetooth = {
+        enable = true;
+        powerOnBoot = true;
+      };
+ 
       }
 
 	./_nix/hardware-configuration.nix
@@ -44,33 +47,14 @@ in {
     };
 
     modules = with self.modules.homeManager; [
+      core
+      graphical
 
-       {
-
+      {
         home.username = username;
-        home.packages = with pkgs; [ dmenu i3 i3status nerd-fonts.hurmit ];
-        home.file.".config/i3".source = ../../modules/programs/i3-config-laptop;
+        home.file.".config/i3".source = ../../modules/programs/config/i3/laptop;
         home.homeDirectory = "/home/${username}";
-        # This value determines the home Manager release that your
-        # configuration is compatible with. This helps avoid breakage
-        # when a new home Manager release introduces backwards
-        # incompatible changes.
-        #
-        # You can update home Manager without changing this value. See
-        # the home Manager release notes for a list of state version
-        # changes in each release.
-        home.stateVersion = "24.11";
       }
-
-      tmux
-      neovim
-      bash
-      wezterm
-      opencode
-      git
-      chrome
-
     ];
   };
-
 }

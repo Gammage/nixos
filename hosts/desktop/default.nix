@@ -10,21 +10,8 @@ in {
     specialArgs = { inherit hostname username; };
     modules = with self.modules.nixos; [
       core
-      openssh
-      users
-      programs
-      localsend
-      discord
 
       ({ pkgs, ...}: {
-       environment.systemPackages = with pkgs; [
-          steam
-          gimp
-          davinci-resolve
-          clinfo
-          ffmpeg
-          android-tools
-        ];
         boot.loader = {
           systemd-boot.enable = true;
           efi.canTouchEfiVariables = true;
@@ -61,28 +48,20 @@ in {
     };
 
     modules = with self.modules.homeManager; [
+      core
+      graphical
+      davinciResolve
+      spotify
+      steam
 
       ({ pkgs, ...}: {
         home.username = username;
         home.homeDirectory = "/home/${username}";
-        home.packages = [
-          pkgs.nerd-fonts.hurmit
-          pkgs.quarto
-        ];
+        home.file.".config/i3".source = ../../modules/programs/config/i3/desktop;
         home.sessionVariables = {
           LD_LIBRARY_PATH = "${pkgs.stdenv.cc.cc.lib}/lib:${pkgs.zlib}/lib";
         };
-        home.stateVersion = "24.11";
       })
-      tmux
-      neovim
-      moltenPython
-      bash
-      wezterm
-      opencode
-      git
-      i3
-      chrome
     ];
   };
 }

@@ -1,9 +1,4 @@
-{ flake.modules.homeManager.bash = { pkgs, ... }: {
-  programs.bash = {
-    enable = true;
-    bashrcExtra = ''
       # Auto authenticate key
-
       alias obsidian='(nohup obsidian >/dev/null 2>&1 &)'
 
       # Activate/deactivate venv
@@ -48,15 +43,4 @@
       alias rehome='home-manager switch --flake ~/nixos#ben@$(hostname)'
        alias rebuild='sudo nixos-rebuild switch --flake ~/nixos#$(hostname)'
        alias shutdown='sudo systemctl poweroff'
-     '';
-  };
-
-  programs.fzf.enable = true;
-
-  services.ssh-agent.enable = true;
-
-  home.packages = with pkgs; [
-    nodejs
-  ];
-  };
-}
+ 

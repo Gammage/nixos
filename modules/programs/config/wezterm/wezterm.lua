@@ -1,7 +1,3 @@
-{ flake.modules.homeManager.wezterm = { ... }: {
-  programs.wezterm = {
-    enable = true;
-    extraConfig = ''
       local wezterm = require("wezterm")
 
       local config = {
@@ -15,7 +11,4 @@
       }
 
       return config
-    '';
-  };
-  }; }
-
+ 
