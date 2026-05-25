@@ -83,6 +83,7 @@
       fzf 
       coreutils 
       bash 
+      opencode
       git 
       tmux 
       neovim

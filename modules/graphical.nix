@@ -13,7 +13,7 @@
     ];
 
     home.file = {
-      ".wezterm.lua".text = builtins.readFile ./programs/config/wezterm/wezterm.lua;
+      ".config/wezterm/wezterm.lua".text = builtins.readFile ./programs/config/wezterm/wezterm.lua;
     };
   };
 }
