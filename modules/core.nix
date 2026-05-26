@@ -96,6 +96,7 @@
 
     home.file = {
       ".bashrc".text = builtins.readFile ./programs/config/bash/.bashrc;
+      ".bash_profile".text = "if [ -f \"$HOME/.bashrc\" ]; then source \"$HOME/.bashrc\"; fi";
       ".tmux.conf".text = builtins.readFile ./programs/config/tmux/tmux.conf;
       ".gitconfig".source = ./programs/config/git/.gitconfig;
       ".config/nvim".source = ./programs/config/nvim;
