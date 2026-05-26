@@ -43,4 +43,11 @@
       alias rehome='home-manager switch --flake ~/nixos#ben@$(hostname)'
        alias rebuild='sudo nixos-rebuild switch --flake ~/nixos#$(hostname)'
        alias shutdown='sudo systemctl poweroff'
+
+       # fzf shell integration (Ctrl-R, Ctrl-T, Alt-C)
+       eval "$(fzf --bash)"
+
+       # Append history immediately instead of buffering, so tmux panes don't
+       # overwrite each other's history on exit
+       PROMPT_COMMAND="history -a; $PROMPT_COMMAND"
  
