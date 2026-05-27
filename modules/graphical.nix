@@ -7,6 +7,7 @@
       firefox
       gimp
       obsidian
+      obs-studio
       google-chrome
       i3
       i3status
