@@ -5,8 +5,8 @@
       dmenu
       discord
       firefox
-      flameshot
       gimp
+      maim
       obsidian
       obs-studio
       google-chrome
