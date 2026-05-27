@@ -5,6 +5,7 @@
       dmenu
       discord
       firefox
+      flameshot
       gimp
       obsidian
       obs-studio
