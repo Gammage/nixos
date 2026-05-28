@@ -22,8 +22,5 @@
     ];
     systems = [ "x86_64-linux" ];
 
-    perSystem = { pkgs, ... }: {
-      devShells = import ./modules/dev { inherit pkgs; };
-    };
   };
 }
