@@ -75,7 +75,6 @@
       curl
       ripgrep
       unzip
-      uv
       wget
       nodejs
       live-server
