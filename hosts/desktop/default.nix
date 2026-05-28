@@ -53,6 +53,7 @@ in {
       davinciResolve
       spotify
       steam
+      minecraft
 
       ({ pkgs, ...}: {
         home.username = username;
