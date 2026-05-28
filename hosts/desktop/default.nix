@@ -53,7 +53,7 @@ in {
       davinciResolve
       spotify
       steam
-      minecraft
+      prismlauncher
 
       ({ pkgs, ...}: {
         home.username = username;
