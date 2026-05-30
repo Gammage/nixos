@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+# tmux-sessionizer
+# stolen & adapted from ThePrimeagen/Mainly Noah
+
+dirs="$HOME/ $HOME/repos $HOME/projects/data-projects $HOME/projects/websites"
+addtl=$(echo "_ /tmp/scratch" | sed 's/ /\\n/g')
+tmux_running=$(pgrep tmux)
+
+# user can provide an argument, else we will try to find from list of directories
+if [[ $# -eq 1 ]]; then
+    target_dir=$1
+fi
+
+# if not connected to tmux and tmux is not running
+if [[ -z $TMUX ]] || [[ -z $tmux_running ]]; then
+    tmux_startup
+    exit 0
+fi
+
+if [[ -z $target_dir ]]; then
+    found=$(find $dirs -maxdepth 1 -mindepth 1 -type d)
+
+    # add * to sessions that are already open
+    existing_session_names=$(TMUX="" tmux list-sessions -F "#{session_id} #{session_name}" 2>/dev/null | sort | sed 's/$[0-9]\+/*/')
+
+    # remove existing sessions from `found`
+    existing_sessions_diff=$(TMUX="" tmux list-sessions -F "#{session_name}\n#{session_path}" 2>/dev/null)
+    diff=$(comm -23 <(echo -e "${found}\n${addtl}" | sort) <(echo -e "${existing_sessions_diff}" | sort))
+
+    target_dir=$(echo -e "${existing_session_names}\n${diff}" | fzf | sed 's/^* //')
+fi
+
+# if no target found, exit
+if [[ -z $target_dir ]]; then
+    exit 0
+fi
+
+target_name=$(basename "$target_dir" | tr . _)
+if ! tmux has-session -t="$target_name" 2> /dev/null; then
+    tmux new-session -ds "$target_name" -c "$target_dir"
+fi
+tmux switch-client -t "$target_name"
