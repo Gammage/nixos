@@ -4,6 +4,9 @@ alias obsidian='(nohup obsidian >/dev/null 2>&1 &)'
 # bash scripts path
 export PATH="$PATH:$HOME/nixos/scripts/"
 
+# auto-activate devenv on projects when CD into them
+eval "$(devenv hook bash)"
+
 # Activate/deactivate venv
 alias venv='if [[ -n $VIRTUAL_ENV_PROMPT ]]; then deactivate; elif [ -d "./.venv" ]; then source ./.venv/bin/activate; elif [ -d "./venv" ]; then source ./venv/bin/activate; else echo "no environment found"; fi'
 

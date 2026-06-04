@@ -86,6 +86,7 @@
       git
       tmux
       neovim
+      devenv
       android-tools
       clinfo
       ffmpeg

@@ -265,7 +265,7 @@ require("lazy").setup({
 	-- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
 	"NMAC427/guess-indent.nvim", -- Detect tabstop and shiftwidth automatically
   { 
-    "n-sweep/telemux-nvim" 
+    "n-sweep/telemux-nvim", 
 
 		config = function(_)
 			require("telemux")
