@@ -30,9 +30,9 @@ in {
 
        ({ lib, ... }: {
          services.xserver.windowManager.i3.enable = true;
-         services.xserver.displayManager.lightdm.autoLogin.enable = true;
-         services.xserver.displayManager.lightdm.autoLogin.user = "ben";
-          services.xserver.displayManager.defaultSession = "none+i3";
+         services.displayManager.autoLogin.enable = true;
+         services.displayManager.autoLogin.user = "ben";
+         services.displayManager.defaultSession = "none+i3";
        })
 
 	./_nix/hardware-configuration.nix	

@@ -30,12 +30,13 @@
       xserver = {
         enable = true;
         displayManager.lightdm.enable = true;
-        libinput.enable = true;
         xkb = {
           layout = "gb";
           options = "altwin:super_win";
         };
       };
+
+      libinput.enable = true;
 
       openssh = {
         enable = true;
@@ -57,6 +58,12 @@
     networking.firewall.allowedUDPPorts = [ 53317 ];
 
     security.sudo.wheelNeedsPassword = false;
+
+    xdg.portal = {
+        enable = true;
+        extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+        config.common.default = "*";
+    };
 
     fonts.packages = with pkgs; [
       nerd-fonts.hurmit
