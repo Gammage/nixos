@@ -91,6 +91,7 @@
       bash
       opencode
       git
+      gh
       tmux
       neovim
       devenv
