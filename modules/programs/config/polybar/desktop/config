@@ -1,4 +1,6 @@
 [bar/main]
+monitor = ${env:MONITOR}
+bottom = true
 width = 100%
 height = 28
 radius = 6
@@ -10,26 +12,27 @@ module-margin-left = 1
 module-margin-right = 2
 font-0 = Hurmit Nerd Font:style=Regular:size=11;2
 modules-left = i3
-modules-center = date
-modules-right = ethernet pulseaudio
+modules-right = date pulseaudio
 cursor-click = pointer
 cursor-scroll = ns-resize
 enable-ipc = true
 
 [module/i3]
 type = internal/i3
+pin-workspaces = false
+index-sort = true
 format = <label-state> <label-mode>
-label-focused = %index%
+label-focused = %name%
 label-focused-foreground = #cba6f7
 label-focused-underline = #cba6f7
 label-focused-padding = 1
-label-unfocused = %index%
+label-unfocused = %name%
 label-unfocused-foreground = #585b70
 label-unfocused-padding = 1
-label-visible = %index%
+label-visible = %name%
 label-visible-foreground = #a6adc8
 label-visible-padding = 1
-label-urgent = %index%
+label-urgent = %name%
 label-urgent-foreground = #f38ba8
 label-urgent-padding = 1
 
@@ -54,9 +57,10 @@ label-disconnected =  down
 
 [module/pulseaudio]
 type = internal/pulseaudio
+sink-auto-fallback = true
 format-volume = <label-volume>
-label-volume =  %percentage%%
+label-volume =  %percentage%%
 format-volume-foreground = #89b4fa
 format-muted = <label-muted>
-label-muted =  MUTED
+label-muted =  MUTED
 format-muted-foreground = #f38ba8

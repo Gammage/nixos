@@ -1,4 +1,6 @@
 [bar/main]
+monitor = ${env:MONITOR}
+bottom = true
 width = 100%
 height = 28
 radius = 6
@@ -10,8 +12,7 @@ module-margin-left = 1
 module-margin-right = 2
 font-0 = Hurmit Nerd Font:style=Regular:size=11;2
 modules-left = i3
-modules-center = date
-modules-right = wireless pulseaudio battery
+modules-right = date wireless pulseaudio battery
 cursor-click = pointer
 cursor-scroll = ns-resize
 enable-ipc = true
@@ -54,11 +55,12 @@ label-disconnected =  down
 
 [module/pulseaudio]
 type = internal/pulseaudio
+sink-auto-fallback = true
 format-volume = <label-volume>
-label-volume =  %percentage%%
+label-volume =  %percentage%%
 format-volume-foreground = #89b4fa
 format-muted = <label-muted>
-label-muted =  MUTED
+label-muted =  MUTED
 format-muted-foreground = #f38ba8
 
 [module/battery]

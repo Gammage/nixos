@@ -6,14 +6,14 @@ set $mod Mod4
 # ----------------------------
 # WORKSPACES
 # ----------------------------
-set $ws1 "1"
-set $ws2 "2"
+set $ws1 "1: "
+set $ws2 "2: "
 set $ws3 "3"
-set $ws4 "4"
-set $ws5 "5"
+set $ws4 "4: "
+set $ws5 "5: "
 set $ws6 "6"
-set $ws7 "7"
-set $ws8 "8"
+set $ws7 "7: "
+set $ws8 "8: "
 set $ws9 "9"
 
 # ----------------------------
@@ -47,6 +47,16 @@ bindsym $mod+h focus left
 bindsym $mod+j focus down
 bindsym $mod+k focus up
 bindsym $mod+l focus right
+
+# ----------------------------
+# VOLUME
+# ----------------------------
+bindsym XF86AudioRaiseVolume exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
+bindsym XF86AudioLowerVolume exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
+bindsym XF86AudioMute exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+bindsym $mod+Shift+equal exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
+bindsym $mod+equal exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
+bindsym $mod+m exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
 
 # ----------------------------
 # WORKSPACE ASSIGNMENTS
