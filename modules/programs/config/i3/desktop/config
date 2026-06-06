@@ -41,6 +41,7 @@ bindsym $mod+Return exec wezterm
 bindsym $mod+Shift+q kill
 bindsym $mod+Shift+e exec i3-msg exit
 bindsym $mod+Control+r reload
+bindsym $mod+p exec import ~/Pictures/screenshot_$(date +\%Y\%m\%d_\%H\%M\%S).png
 
 bindsym $mod+h focus left
 bindsym $mod+j focus down

@@ -13,7 +13,7 @@
       i3
       i3status
       wezterm
-      flameshot
+      imagemagick
     ];
 
     home.file = {
