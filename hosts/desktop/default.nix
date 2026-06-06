@@ -62,6 +62,8 @@ in {
         home.sessionVariables = {
           LD_LIBRARY_PATH = "${pkgs.stdenv.cc.cc.lib}/lib:${pkgs.zlib}/lib";
         };
+
+        home.file.".config/polybar".source = ../../modules/programs/config/polybar/desktop;
       })
     ];
   };

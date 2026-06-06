@@ -12,6 +12,7 @@
       google-chrome
       i3
       i3status
+      polybarFull
       wezterm
       imagemagick
     ];

@@ -53,6 +53,7 @@ in {
       {
         home.username = username;
         home.file.".config/i3".source = ../../modules/programs/config/i3/laptop;
+        home.file.".config/polybar".source = ../../modules/programs/config/polybar/laptop;
         home.homeDirectory = "/home/${username}";
       }
     ];
