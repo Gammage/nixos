@@ -99,6 +99,7 @@
       clinfo
       ffmpeg
       nixpkgs-fmt
+      yazi
       (python3.withPackages (ps: with ps; [ black jupytext ]))
     ];
 
