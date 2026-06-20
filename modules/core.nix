@@ -111,6 +111,7 @@
       ".config/nvim".source = ./programs/config/nvim;
       ".opencode/AGENTS.md".source = ./programs/config/opencode/AGENTS.md;
       ".opencode/skills".source = ./programs/config/opencode/skills;
+      ".config/opencode/opencode.json".source = ./programs/config/opencode/opencode.json;
     };
 
     home.sessionVariables = {
