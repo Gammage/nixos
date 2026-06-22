@@ -2,6 +2,7 @@ local wezterm = require("wezterm")
 local act = wezterm.action
 
 local config = {
+    copy_on_select = true,
     window_decorations = "RESIZE",
     audible_bell = "Disabled",
     color_scheme = "Afterglow (Gogh)",
