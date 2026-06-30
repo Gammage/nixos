@@ -65,8 +65,8 @@ format-muted-foreground = #f38ba8
 
 [module/battery]
 type = internal/battery
-battery = BAT1
-adapter = AC0
+battery = BAT0
+adapter = AC
 full-at = 98
 format-charging = <label-charging>
 format-charging-foreground = #a6e3a1
