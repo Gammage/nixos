@@ -15,6 +15,7 @@
       polybarFull
       wezterm
       imagemagick
+      zoom-us
     ];
 
     home.file = {
