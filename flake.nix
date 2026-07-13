@@ -6,6 +6,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     import-tree.url = "github:vic/import-tree";
+    nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
 
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -20,7 +21,7 @@
       (inputs.import-tree ./hosts)
       (inputs.import-tree ./modules)
     ];
-    systems = [ "x86_64-linux" ];
+    systems = [ "x86_64-linux" "aarch64-linux" ];
 
   };
 }
