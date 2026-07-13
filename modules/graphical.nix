@@ -16,6 +16,7 @@
       wezterm
       imagemagick
       zoom-us
+      wineWowPackages.stable
     ];
 
     home.file = {
