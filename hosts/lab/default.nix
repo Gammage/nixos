@@ -3,23 +3,21 @@ let
   username = "ben";
   hostname = "lab";
   addr = "${username}@${hostname}";
-  system = "aarch64-linux";
   systemStateVersion = "25.05";
 in {
-  flake.nixosConfigurations.${hostname} = inputs.nixpkgs.lib.nixosSystem {
-    specialArgs = { inherit hostname username; nixos-raspberrypi = inputs.nixos-raspberrypi; };
-    modules = with self.modules.nixos; [
-      core
+  flake.nixosConfigurations.${hostname} = inputs.nixos-raspberrypi.lib.nixosSystem {
+    specialArgs = { inherit hostname username; };
+    modules = [
+      self.modules.nixos.core
 
       ({ pkgs, lib, ... }: {
-        nixpkgs.hostPlatform.system = system;
-        system.stateVersion = systemStateVersion;
-
-        imports = [
-          inputs.nixos-raspberrypi.nixosModules.raspberry-pi-5.base
-          inputs.nixos-raspberrypi.nixosModules.raspberry-pi-5.bluetooth
-          inputs.nixos-raspberrypi.nixosModules.sd-image
+        imports = with inputs.nixos-raspberrypi.nixosModules; [
+          raspberry-pi-5.base
+          raspberry-pi-5.bluetooth
+          sd-image
         ];
+
+        system.stateVersion = systemStateVersion;
 
         networking.useNetworkd = true;
         networking.networkmanager.enable = false;
@@ -44,7 +42,7 @@ in {
   };
 
   flake.homeConfigurations."${addr}" = inputs.home-manager.lib.homeManagerConfiguration {
-    pkgs = inputs.nixpkgs.legacyPackages.${system};
+    pkgs = inputs.nixpkgs.legacyPackages.aarch64-linux;
 
     extraSpecialArgs = {
       inherit username hostname;

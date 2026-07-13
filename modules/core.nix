@@ -1,6 +1,6 @@
 {
   # NIX OS
-  flake.modules.nixos.core = { pkgs, username, hostname, ... }: {
+  flake.modules.nixos.core = { pkgs, lib, username, hostname, ... }: {
 
     users.users.${username} = {
       isNormalUser = true;
@@ -31,7 +31,7 @@
     i18n.defaultLocale = "en_GB.UTF-8";
 
     networking.hostName = hostname;
-    networking.networkmanager.enable = true;
+    networking.networkmanager.enable = lib.mkDefault true;
 
     security.sudo.wheelNeedsPassword = false;
 
