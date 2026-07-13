@@ -50,7 +50,7 @@
       wezterm
       imagemagick
       zoom-us
-      wineWowPackages.stable
+      wineWow64Packages.stable
     ];
 
     home.file = {
