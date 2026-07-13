@@ -7,8 +7,10 @@ let
   systemStateVersion = "25.05";
 in {
   flake.nixosConfigurations.${hostname} = inputs.nixpkgs.lib.nixosSystem {
-    specialArgs = { inherit hostname username; };
-    modules = [
+    specialArgs = { inherit hostname username; nixos-raspberrypi = inputs.nixos-raspberrypi; };
+    modules = with self.modules.nixos; [
+      core
+
       ({ pkgs, lib, ... }: {
         nixpkgs.hostPlatform.system = system;
         system.stateVersion = systemStateVersion;
@@ -19,6 +21,7 @@ in {
         ];
 
         networking.useNetworkd = true;
+        networking.networkmanager.enable = false;
 
         services.tailscale.enable = true;
 
@@ -31,33 +34,10 @@ in {
           };
         };
 
-        services.openssh = {
-          enable = true;
-          settings = {
-            PermitRootLogin = "no";
-            PasswordAuthentication = true;
-          };
-        };
-
         networking.firewall = {
-          allowedTCPPorts = [ 22 3000 ];
+          allowedTCPPorts = [ 22 3000 80 443 ];
           allowedUDPPorts = [ 41641 ];
         };
-
-        users.users.${username} = {
-          isNormalUser = true;
-          extraGroups = [ "wheel" ];
-        };
-
-        nix.settings = {
-          experimental-features = [ "nix-command" "flakes" ];
-          trusted-users = [ username ];
-        };
-
-        security.sudo.wheelNeedsPassword = false;
-
-        time.timeZone = "Europe/London";
-        i18n.defaultLocale = "en_GB.UTF-8";
       })
     ];
   };
@@ -70,19 +50,14 @@ in {
       inputs = builtins.removeAttrs inputs [ "self" ];
     };
 
-    modules = [
-      ({ pkgs, ... }: {
+    modules = with self.modules.homeManager; [
+      core
+
+      {
         home.stateVersion = "25.05";
-        programs.home-manager.enable = true;
         home.username = username;
         home.homeDirectory = "/home/${username}";
-
-        home.packages = with pkgs; [
-          git
-          tmux
-          neovim
-        ];
-      })
+      }
     ];
   };
 }

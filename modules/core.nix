@@ -14,30 +14,8 @@
 
     nixpkgs.config.allowUnfree = true;
 
-    # Audio (PipeWire)
-    security.rtkit.enable = true;
-
     # SERVICES 
     services = {
-
-      pipewire = {
-        enable = true;
-        alsa.enable = true;
-        alsa.support32Bit = true;
-        pulse.enable = true;
-      };
-
-      xserver = {
-        enable = true;
-        displayManager.lightdm.enable = true;
-        xkb = {
-          layout = "gb";
-          options = "altwin:super_win";
-        };
-      };
-
-      libinput.enable = true;
-
       openssh = {
         enable = true;
         settings = {
@@ -54,20 +32,8 @@
 
     networking.hostName = hostname;
     networking.networkmanager.enable = true;
-    networking.firewall.allowedTCPPorts = [ 53317 ];
-    networking.firewall.allowedUDPPorts = [ 53317 ];
 
     security.sudo.wheelNeedsPassword = false;
-
-    xdg.portal = {
-        enable = true;
-        extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-        config.common.default = "*";
-    };
-
-    fonts.packages = with pkgs; [
-      nerd-fonts.hurmit
-    ];
 
   };
 
@@ -85,7 +51,6 @@
       wget
       nodejs
       live-server
-      localsend
       fzf
       coreutils
       bash

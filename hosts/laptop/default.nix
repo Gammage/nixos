@@ -10,6 +10,7 @@ in {
     specialArgs = { inherit hostname username; };
     modules = with self.modules.nixos; [
       core
+      graphical
 
       ({ lib, ... }: {
         services.xserver.windowManager.i3.enable = true;
@@ -21,7 +22,9 @@ in {
   	  systemd-boot.enable = true;
   	  efi.canTouchEfiVariables = true;
 	};
-      
+
+        boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+
         nixpkgs.hostPlatform.system = system;
         system.stateVersion = systemStateVersion;
         

@@ -10,6 +10,7 @@ in {
     specialArgs = { inherit hostname username; };
     modules = with self.modules.nixos; [
       core
+      graphical
 
       ({ pkgs, ...}: {
         boot.loader = {
