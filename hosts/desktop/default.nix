@@ -69,10 +69,6 @@ in {
         home.file.".config/polybar".source = ../../modules/programs/config/polybar/desktop;
 
         home.packages = with pkgs; [
-          (wineWowPackages.full.override {
-            wineRelease = "staging";
-            mingwSupport = true;
-          })
           winetricks
         ];
       })
