@@ -19,6 +19,8 @@ in {
         };
 
 
+        boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+
         nixpkgs.hostPlatform.system = system;
         system.stateVersion = systemStateVersion;
          
