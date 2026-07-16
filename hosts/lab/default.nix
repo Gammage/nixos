@@ -17,6 +17,10 @@ in {
           sd-image
         ];
 
+        users.users.${username} = {
+          initialPassword = "admin";
+        };
+
         system.stateVersion = systemStateVersion;
 
         networking.useNetworkd = true;
