@@ -25,6 +25,8 @@
           MaxAuthTries = 6;
         };
       };
+
+      tailscale.enable = true;
     };
 
     time.timeZone = "Europe/London";

@@ -26,8 +26,6 @@ in {
         networking.useNetworkd = true;
         networking.networkmanager.enable = true;
 
-        services.tailscale.enable = true;
-
         services.gitea = {
           enable = true;
           database.type = "sqlite3";
