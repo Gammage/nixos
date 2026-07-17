@@ -24,7 +24,7 @@ in {
         system.stateVersion = systemStateVersion;
 
         networking.useNetworkd = true;
-        networking.networkmanager.enable = false;
+        networking.networkmanager.enable = true;
 
         services.tailscale.enable = true;
 
