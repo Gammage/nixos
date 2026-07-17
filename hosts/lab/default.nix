@@ -23,6 +23,29 @@ in {
 
         system.stateVersion = systemStateVersion;
 
+        fileSystems."/mnt/ssd" = {
+          device = "/dev/disk/by-label/Storage";
+          fsType = "ext4";
+          options = [ "noatime" ];
+        };
+
+        environment.etc."nextcloud-admin-pass".text = "202003195502";
+
+        services.nextcloud = {
+          enable = true;
+          package = pkgs.nextcloud32;
+          hostName = "lab";
+          https = false;
+          datadir = "/mnt/ssd/nextcloud";
+          maxUploadSize = "10G";
+          config = {
+            dbtype = "sqlite";
+            adminpassFile = "/etc/nextcloud-admin-pass";
+            adminuser = "root";
+            extraTrustedDomains = [ "lab" ];
+          };
+        };
+
         networking.useNetworkd = true;
         networking.networkmanager.enable = true;
 
