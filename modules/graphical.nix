@@ -33,7 +33,7 @@
   };
 
   # HOME - MANAGER
-  flake.modules.homeManager.graphical = { pkgs, ... }: {
+  flake.modules.homeManager.graphical = { pkgs, lib, ... }: {
     home.packages = with pkgs; [
       nextcloud-client
       arandr
@@ -58,5 +58,12 @@
     home.file = {
       ".config/wezterm/wezterm.lua".text = builtins.readFile ./programs/config/wezterm/wezterm.lua;
     };
+
+    home.activation.nextcloudVfs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      CFG="$HOME/.config/Nextcloud/nextcloud.cfg"
+      if [ -f "$CFG" ] && ! grep -q "showExperimentalOptions=true" "$CFG"; then
+        sed -i '/\[General\]/a showExperimentalOptions=true' "$CFG"
+      fi
+    '';
   };
 }
