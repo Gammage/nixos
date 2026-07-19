@@ -24,9 +24,9 @@ in {
         system.stateVersion = systemStateVersion;
 
         fileSystems."/mnt/ssd" = {
-          device = "/dev/disk/by-label/Storage";
+          device = "/dev/disk/by-label/storage";
           fsType = "ext4";
-          options = [ "noatime" ];
+          options = [ "noatime" "nofail" ];
         };
 
         environment.etc."nextcloud-admin-pass".text = "202003195502";
@@ -42,8 +42,8 @@ in {
             dbtype = "sqlite";
             adminpassFile = "/etc/nextcloud-admin-pass";
             adminuser = "root";
-            extraTrustedDomains = [ "lab" ];
           };
+          settings.trusted_domains = [ "lab" ];
         };
 
         networking.useNetworkd = true;
