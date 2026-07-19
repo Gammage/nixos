@@ -44,6 +44,7 @@
       obsidian
       obs-studio
       google-chrome
+      tor-browser
       i3
       i3status
       polybarFull
