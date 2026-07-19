@@ -3,14 +3,6 @@
   flake.modules.nixos.graphical = { pkgs, ... }: {
     security.rtkit.enable = true;
 
-    boot.supportedFilesystems = [ "davfs" ];
-
-    fileSystems."/home/ben/nextcloud" = {
-      device = "http://lab/remote.php/dav/files/ben/";
-      fsType = "davfs";
-      options = [ "noauto" "user" "_netdev" ];
-    };
-
     services.pipewire = {
       enable = true;
       alsa.enable = true;
@@ -43,7 +35,7 @@
   # HOME - MANAGER
   flake.modules.homeManager.graphical = { pkgs, ... }: {
     home.packages = with pkgs; [
-      davfs2
+      rclone
       arandr
       dmenu
       discord
