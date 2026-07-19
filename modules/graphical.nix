@@ -65,7 +65,6 @@
 
     home.file = {
       ".config/wezterm/wezterm.lua".text = builtins.readFile ./programs/config/wezterm/wezterm.lua;
-      "nextcloud".recursive = true;
     };
   };
 }
