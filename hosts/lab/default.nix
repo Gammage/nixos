@@ -51,6 +51,7 @@ in {
 
         services.gitea = {
           enable = true;
+          stateDir = "/mnt/ssd/gitea";
           database.type = "sqlite3";
           settings.service = {
             DISABLE_REGISTRATION = true;
