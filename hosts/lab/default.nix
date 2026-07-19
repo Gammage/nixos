@@ -41,7 +41,7 @@ in {
           config = {
             dbtype = "sqlite";
             adminpassFile = "/etc/nextcloud-admin-pass";
-            adminuser = "root";
+            adminuser = "ben";
           };
           settings.trusted_domains = [ "lab" ];
         };
