@@ -37,7 +37,7 @@ in {
           hostName = "lab";
           https = false;
           datadir = "/mnt/ssd/nextcloud";
-          maxUploadSize = "10G";
+          maxUploadSize = "50G";
           config = {
             dbtype = "sqlite";
             adminpassFile = "/etc/nextcloud-admin-pass";
