@@ -35,7 +35,7 @@
   # HOME - MANAGER
   flake.modules.homeManager.graphical = { pkgs, ... }: {
     home.packages = with pkgs; [
-      rclone
+      nextcloud-client
       arandr
       dmenu
       discord
