@@ -3,6 +3,14 @@
   flake.modules.nixos.graphical = { pkgs, ... }: {
     security.rtkit.enable = true;
 
+    boot.supportedFilesystems = [ "davfs" ];
+
+    fileSystems."/home/ben/nextcloud" = {
+      device = "http://lab/remote.php/dav/files/ben/";
+      fsType = "davfs";
+      options = [ "noauto" "user" "_netdev" ];
+    };
+
     services.pipewire = {
       enable = true;
       alsa.enable = true;
@@ -35,6 +43,7 @@
   # HOME - MANAGER
   flake.modules.homeManager.graphical = { pkgs, ... }: {
     home.packages = with pkgs; [
+      davfs2
       arandr
       dmenu
       discord
@@ -56,6 +65,7 @@
 
     home.file = {
       ".config/wezterm/wezterm.lua".text = builtins.readFile ./programs/config/wezterm/wezterm.lua;
+      "nextcloud".recursive = true;
     };
   };
 }
