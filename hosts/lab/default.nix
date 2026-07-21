@@ -49,6 +49,8 @@ in {
         networking.useNetworkd = true;
         networking.networkmanager.enable = true;
 
+        environment.systemPackages = [ pkgs.gitea ];
+
         services.gitea = {
           enable = true;
           stateDir = "/mnt/ssd/gitea";
