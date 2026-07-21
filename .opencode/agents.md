@@ -74,12 +74,14 @@ When the user has finished editing in DaVinci and wants to prepare videos for Yo
 
 ### FFmpeg Command Template
 ```bash
-ffmpeg -i INPUT.mov -c:v libx264 -crf 18 -preset slow -c:a aac -b:a 256k OUTPUT.mp4
+ffmpeg -i INPUT.mov -c:v libx264 -crf 18 -preset slow -pix_fmt yuv420p -movflags +faststart -c:a aac -b:a 256k OUTPUT.mp4
 ```
 
 - `-c:v libx264` - H.264 encoder
 - `-crf 18` - Constant Rate Factor (lower = better quality, 18 is visually lossless)
 - `-preset slow` - Better compression efficiency
+- `-pix_fmt yuv420p` - Force 4:2:0 chroma subsampling for maximum compatibility (ProRes uses 4:2:2 which some platforms reject)
+- `-movflags +faststart` - Move metadata to front of file for faster web streaming and processing
 - `-c:a aac -b:a 256k` - AAC audio at 256 kbps
 
 ### Destination
