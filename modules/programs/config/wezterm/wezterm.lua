@@ -2,6 +2,7 @@ local wezterm = require("wezterm")
 local act = wezterm.action
 
 local config = {
+    front_end = "Software",
     window_decorations = "RESIZE",
     audible_bell = "Disabled",
     color_scheme = "Afterglow (Gogh)",
@@ -49,4 +50,3 @@ local config = {
 }
 
 return config
-
