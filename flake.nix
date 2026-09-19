@@ -7,6 +7,7 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     import-tree.url = "github:vic/import-tree";
     nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
+    opencode.url = "github:sst/opencode";
 
     home-manager = {
       url = "github:nix-community/home-manager";
