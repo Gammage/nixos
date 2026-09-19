@@ -40,7 +40,7 @@
   };
 
   # HOME - MANAGER
-  flake.modules.homeManager.core = { pkgs, config, ... }: {
+  flake.modules.homeManager.core = { pkgs, config, inputs, ... }: {
 
     home.stateVersion = "25.11";
     programs.home-manager.enable = true;
@@ -56,7 +56,7 @@
       fzf
       coreutils
       bash
-      opencode
+      inputs.opencode.packages.${pkgs.system}.opencode
       git
       gh
       tmux
