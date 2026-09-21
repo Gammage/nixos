@@ -42,7 +42,6 @@
       gimp
       maim
       obsidian
-      obs-studio
       google-chrome
       tor-browser
       i3

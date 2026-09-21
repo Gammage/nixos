@@ -55,6 +55,7 @@ in {
     modules = with self.modules.homeManager; [
       core
       graphical
+      obsStudio
       davinciResolve
       spotify
       steam

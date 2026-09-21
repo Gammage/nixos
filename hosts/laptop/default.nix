@@ -52,6 +52,7 @@ in {
     modules = with self.modules.homeManager; [
       core
       graphical
+      obsStudio
 
       {
         home.username = username;
