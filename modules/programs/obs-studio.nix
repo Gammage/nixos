@@ -1,11 +1,8 @@
 { flake.modules.homeManager.obsStudio = { pkgs, ... }:
-  let
-    aitumStreamSuite =
-      pkgs.callPackage ../../pkgs/obs-aitum-stream-suite {};
-  in {
+  {
     home.packages = [
       (pkgs.wrapOBS {
-        plugins = [ aitumStreamSuite ];
+        plugins = [ pkgs.obs-studio-plugins.obs-aitum-multistream ];
       })
     ];
   };
