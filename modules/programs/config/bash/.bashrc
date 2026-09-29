@@ -48,6 +48,7 @@ alias l='ls -CF --color=auto'
 alias reload='i3-msg reload'
 alias rehome='home-manager switch --flake ~/nixos#ben@$(hostname)'
  alias rebuild='sudo nixos-rebuild switch --flake ~/nixos#$(hostname)'
+alias Vinegar='flatpak run org.vinegarhq.Vinegar'
  alias shutdown='sudo systemctl poweroff'
 
  # fzf shell integration (Ctrl-R, Ctrl-T, Alt-C)
