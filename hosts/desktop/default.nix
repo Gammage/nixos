@@ -11,6 +11,7 @@ in {
     modules = with self.modules.nixos; [
       core
       graphical
+      robloxStudio
 
       ({ pkgs, ...}: {
         boot.loader = {
