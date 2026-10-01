@@ -30,6 +30,8 @@ in {
            enable32Bit = true;
            extraPackages = with pkgs; [
              rocmPackages.clr.icd
+             vulkan-loader
+             vulkan-tools
            ];
          };
        })
@@ -59,6 +61,7 @@ in {
       obsStudio
       davinciResolve
       spotify
+      whisper
       steam
       prismlauncher
 
