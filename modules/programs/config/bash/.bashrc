@@ -4,6 +4,12 @@ alias obsidian='(nohup obsidian >/dev/null 2>&1 &)'
 # bash scripts path
 export PATH="$PATH:$HOME/nixos/scripts/"
 
+# Home Manager session variables (EDITOR, LD_LIBRARY_PATH, WHISPER_COMMON_MINIAUDIO_SKIP, ...)
+# Nothing else sources these, so without this they are silently unset.
+if [ -f "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
+  . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+fi
+
 # auto-activate devenv on projects when CD into them
 eval "$(devenv hook bash)"
 
