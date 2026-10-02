@@ -59,9 +59,10 @@ Four traps that have already cost time:
 4. `-sns` strips literal `[MUSIC]`/`[BLANK_AUDIO]` tokens. Keep cues as a soft
    track; burn in only on final exports.
 
-Full detail (quality caveats, Resolve import steps, flag notes):
-`~/nixos/.opencode/agents.md`
+Full detail (quality caveats, Resolve import steps, flag notes) is in the
+`video` skill - load it when the request involves subtitles, ProRes, or YouTube.
 
 ## Other video workflows
-ProRes conversion and YouTube export recipes: `~/nixos/.opencode/agents.md`
+ProRes conversion and YouTube export recipes are in the `video` skill.
+Load it rather than improvising ffmpeg settings.
 

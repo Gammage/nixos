@@ -76,11 +76,10 @@
       ".tmux.conf".text = builtins.readFile ./programs/config/tmux/tmux.conf;
       ".gitconfig".source = ./programs/config/git/.gitconfig;
       ".config/nvim".source = ./programs/config/nvim;
-      ".opencode/AGENTS.md".source = ./programs/config/opencode/AGENTS.md;
       # opencode only reads global rules from ~/.config/opencode/AGENTS.md.
       # ~/.opencode/AGENTS.md is NOT loaded, despite OPENCODE_CONFIG_DIR pointing
       # there. Verified empirically with a canary file: the ~/.config path loads,
-      # the ~/.opencode path does not. Both are kept in sync from one source.
+      # the ~/.opencode path does not. Do not add instructions to that path.
       ".config/opencode/AGENTS.md".source = ./programs/config/opencode/AGENTS.md;
       ".opencode/skills".source = ./programs/config/opencode/skills;
       ".config/opencode/opencode.json".source = ./programs/config/opencode/opencode.json;
