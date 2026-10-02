@@ -11,8 +11,9 @@
   3. Move to llm_notes: `mv "files/<ID>.md" "files/llm_notes/<ID>.md"`
 
 ## If working with obsidian/notes directory
-- Note IDs are `<10-digit unix seconds>-<4 UPPERCASE letters>`, e.g. `1779065124-ZBDA.md`
-- The `id:` frontmatter field must match the filename stem
+- Note IDs come from obsidian.nvim's `note_id_func` (`builtin.zettel_id`):
+  `os.time()` + `-` + 4 random A-Z chars. Filename and `id:` are written from the
+  same call, so they always agree — nothing to enforce by hand.
 - Session notes go in `files/llm_notes/`; templates in `templates/`
 - Details and the session-note workflow are in the `obsidian` skill
 
