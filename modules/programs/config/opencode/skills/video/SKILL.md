@@ -18,6 +18,11 @@ loaded; this skill is the supported location.
 
 ## ProRes conversion
 
+> **Do not convert OBS stream recordings.** Streams in `~/Videos/obs_footage/` are
+> already H.264 in an MP4 container, which DaVinci Resolve reads natively. The
+> ProRes workflow below is only for phone footage from `~/Downloads/`. Re-encoding
+> a stream would cost ~15 minutes and a little quality for zero benefit.
+
 When the user requests to reformat or convert video clips for DaVinci Resolve,
 follow these instructions:
 
