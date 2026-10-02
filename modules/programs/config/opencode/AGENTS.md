@@ -10,8 +10,11 @@
   2. Edit: add descriptive alias, fill in sections (summary, files, decisions, lessons, questions)
   3. Move to llm_notes: `mv "files/<ID>.md" "files/llm_notes/<ID>.md"`
 
-## If working with obsidian/notes directory;
- - Enforce naming conventions via note_id_func/frontmatter
+## If working with obsidian/notes directory
+- Note IDs are `<10-digit unix seconds>-<4 UPPERCASE letters>`, e.g. `1779065124-ZBDA.md`
+- The `id:` frontmatter field must match the filename stem
+- Session notes go in `files/llm_notes/`; templates in `templates/`
+- Details and the session-note workflow are in the `obsidian` skill
 
 ## Project Zomboid (retired)
 - No longer played. No server config in NixOS, no systemd units, no backups.
