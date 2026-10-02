@@ -24,3 +24,44 @@
 - PENDING TASK: user wants a daily cron backup of MainServer; run only when server is stopped
 - Safety copies of the corrupt/old saves were kept as `*_CORRUPTED_*` and `*_pre_revert_*` folders under `Saves/Multiplayer/`
 
+## Video subtitles (whisper-cpp → DaVinci Resolve)
+
+User is on **DaVinci Resolve FREE (21.1)**. Do not suggest buying Studio. Free
+edition fully supports adding/importing SRT, editing, styling and burning in —
+only AI transcription is Studio-gated. Never claim subtitles are unavailable.
+
+Set up and working:
+- Package `whisper-cpp` with `vulkanSupport = true` (`modules/programs/whisper.nix`)
+- GPU RX 6700 XT (RADV), model `~/whisper/ggml-large-v3-turbo-q5_0.bin`
+- Throughput **~15x realtime**: a 4h stream takes ~15-20 min
+
+```bash
+mkdir -p ~/Videos/obs_footage/subtitles
+WHISPER_COMMON_MINIAUDIO_SKIP=1 whisper-cli \
+  -m ~/whisper/ggml-large-v3-turbo-q5_0.bin \
+  -f ~/Videos/obs_footage/<STREAM>.mp4 \
+  -osrt -sns -t 8 -pp \
+  -of ~/Videos/obs_footage/subtitles/<STREAM>
+
+test -s ~/Videos/obs_footage/subtitles/<STREAM>.srt && echo OK
+```
+
+Four traps that have already cost time:
+1. **Exit 0 does not mean success.** Verified empirically: whisper exits `0` both
+   when it decodes ~20 ms of audio *and* when it cannot open the output file.
+   Always `test -s`. `WHISPER_COMMON_MINIAUDIO_SKIP=1` forces FFmpeg instead of
+   the unreliable miniaudio path.
+2. **`mkdir -p` is mandatory.** whisper does not create output directories. It
+   transcribes the whole file, fails to open the output, and still exits 0 —
+   wasting the full run. `mkdir -p` is idempotent, so always keep it.
+3. **Background long jobs with `setsid`, never `nohup`.** The opencode shell tool
+   kills its process group on timeout; a `nohup` run died at 5% progress.
+4. `-sns` strips literal `[MUSIC]`/`[BLANK_AUDIO]` tokens. Keep cues as a soft
+   track; burn in only on final exports.
+
+Full detail (quality caveats, Resolve import steps, flag notes):
+`~/nixos/.opencode/agents.md`
+
+## Other video workflows
+ProRes conversion and YouTube export recipes: `~/nixos/.opencode/agents.md`
+
