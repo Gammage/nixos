@@ -29,6 +29,13 @@ User is on **DaVinci Resolve FREE (21.1)**. Do not suggest buying Studio. Free
 edition fully supports adding/importing SRT, editing, styling and burning in —
 only AI transcription is Studio-gated. Never claim subtitles are unavailable.
 
+**Separate but easy to conflate:** free Resolve *on Linux* cannot decode
+H.264/H.265 or AAC. Phone MP4s and OBS streams import with a black viewer and no
+error dialog — they must be transcoded to DNxHR LB or ProRes + `pcm_s16le` before
+editing (see the `video` skill). This never affects SRTs: they are plain text and
+need no video to exist. A request for subtitles does not imply the video is already
+editable, and vice versa.
+
 Set up and working:
 - Package `whisper-cpp` with `vulkanSupport = true` (`modules/programs/whisper.nix`)
 - GPU RX 6700 XT (RADV), model `~/whisper/ggml-large-v3-turbo-q5_0.bin`
@@ -62,6 +69,22 @@ Full detail (quality caveats, Resolve import steps, flag notes) is in the
 `video` skill - load it when the request involves subtitles, ProRes, or YouTube.
 
 ## Other video workflows
-ProRes conversion and YouTube export recipes are in the `video` skill.
-Load it rather than improvising ffmpeg settings.
+Resolve-compatible transcoding and YouTube export recipes are in the `video` skill.
+Load it rather than improvising ffmpeg settings. Default to **ProRes Proxy**
+(`-c:v prores_ks -profile:v 0`). DNxHR LB is a fallback only: it hit an ffmpeg
+assertion failure on a 4h stream and left an unplayable file.
+
+## Long form vs shorts (same master)
+User cuts in Resolve. One master + one full-length SRT serves both outputs; the
+SRT must **never** be burned in during transcoding.
+
+- "make it editable" / "make stream editable for davinci" -> produce a ProRes Proxy
+  master in `~/Videos/obs_footage/edit/`, keep subtitles out of it
+- **Long form** -> Deliver → Subtitle Settings → leave *Export Subtitle* unticked
+- **Shorts** -> tick *Export Subtitle* → **Burn into video**, render marked range
+- Both render from the **same timeline**; it is one checkbox difference
+- Cut shorts on the **full-length timeline**. Copying a clip to a new timeline
+  starts that timeline at 00:00:00 while cues keep their original stamp, so subs
+  land wrong or vanish.
+- Never delete the master or the original source without explicit confirmation
 

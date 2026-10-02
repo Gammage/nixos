@@ -10,33 +10,59 @@ loaded; this skill is the supported location.
 
 | Task | Section |
 |---|---|
-| ProRes clips -> editable for Resolve | [ProRes conversion](#prores-conversion) |
+| "make stream editable for davinci" | [Resolve conversion](#resolve-conversion) |
+| Any H.264/H.265/AAC media -> editable for Resolve | [Resolve conversion](#resolve-conversion) |
+| Phone ProRes clips -> smaller editable copy | [Resolve conversion](#resolve-conversion) |
+| Long form (no subs) vs shorts (burned-in subs) | [Stream deliverables](#stream-deliverables-long-form-and-shorts) |
 | Finished edit -> YouTube upload | [YouTube export](#youtube-export) |
 | Stream recording -> subtitles (SRT) | [Subtitles for OBS streams](#subtitles-for-obs-streams) |
 
 ---
 
-## ProRes conversion
+## Resolve conversion
 
-> **Do not convert OBS stream recordings.** Streams in `~/Videos/obs_footage/` are
-> already H.264 in an MP4 container, which DaVinci Resolve reads natively. The
-> ProRes workflow below is only for phone footage from `~/Downloads/`. Re-encoding
-> a stream would cost ~15 minutes and a little quality for zero benefit.
+### Critical: free edition codec limits on Linux
+
+**Free Resolve on Linux cannot decode H.264/H.265 video or AAC audio.**
+Blackmagic staff, verbatim: "H.264/265 files are not supported in free Resolve on
+Linux. They require the Studio version. That's why you only see the audio portion
+of the files." AAC is unsupported for the same MPEG patent licensing reason.
+
+Symptom: the clip imports, an audio track appears, and the viewer stays black.
+No error dialog. Do not go chasing GPU or driver settings - the codecs are simply
+absent from the free Linux build.
+
+This is **Linux-specific**. Windows and macOS free Resolve play H.264 fine because
+the OS bundles the decoders, so guidance written for those platforms is wrong here.
+
+Consequence: **every** source needs transcoding to ProRes or DNxHR video plus
+`pcm_s16le` audio before it can be edited. That includes phone footage in
+`~/Downloads/` (ProRes HQ decodes fine but is enormous), phone clips in H.265 MP4,
+and OBS stream recordings in `~/Videos/obs_footage/`.
 
 When the user requests to reformat or convert video clips for DaVinci Resolve,
 follow these instructions:
 
 ### Trigger Phrases
+- "make stream editable for davinci" / "make it editable" / "make editable"
+- "convert stream for davinci" / "transcode the stream"
+- "dnxhr the stream" / "prores the stream"
+- "prepare stream for editing"
 - "reformat videos for davinci"
 - "convert clips for davinci"
 - "prepare videos for editing"
 - "format phone clips"
-- Any similar request about converting video files for use in DaVinci Resolve
+- Any similar request about making a video editable in DaVinci Resolve
 
 ### Source Files
-- Location: `~/Downloads/` or subfolders within Downloads
-- Format: Phone-recorded `.mov` files (Apple ProRes HQ codec)
-- These are typically large files (several GB each)
+- Location: `~/Downloads/`, `~/Videos/obs_footage/`, or a user-specified path
+- Format: **anything free Resolve on Linux cannot decode directly**:
+  - Phone ProRes HQ `.mov` - decodes fine, but enormous; convert to shrink
+  - Phone H.264 / H.265 (HEVC) in MP4 - will not decode at all
+  - OBS stream H.264 + AAC in MP4 - will not decode at all
+- Note the user may ask for subtitles *and* an editable copy. These are separate
+  deliverables: the SRT is already complete and needs no re-encoding, but the video
+  still needs transcoding to become editable. Never treat one as implying the other.
 
 ### Conversion Settings
 - **Output codec**: ProRes 422 (not HQ - saves space while maintaining quality)
@@ -45,30 +71,140 @@ follow these instructions:
 - **Sample rate**: Preserve original (typically 48000 Hz)
 - **Channels**: Preserve original (typically 2ch stereo)
 
-### FFmpeg Command Template
+### FFmpeg Command Templates
+
+**Default - ProRes Proxy.** Measured on this machine (Ryzen 7 5800X, 720p30 source):
+**~3.1-3.4x realtime**, ~20 Mbps, so a 4h stream takes ~76 min and lands ~36 GB.
+
 ```bash
-ffmpeg -i INPUT.mov -c:v prores_ks -profile:v 2 -c:a pcm_s16le OUTPUT.mov
+ffmpeg -y -i INPUT -c:v prores_ks -profile:v 0 -pix_fmt yuv422p -c:a pcm_s16le OUTPUT.mov
 ```
 
-- `-c:v prores_ks` - Use the high-quality ProRes encoder
-- `-profile:v 2` - ProRes 422 Standard profile (0=proxy, 1=LT, 2=422, 3=HQ)
-- `-c:a pcm_s16le` - PCM audio matching original quality
+**DNxHR LB - fallback only, NOT the default.** It is roughly 6x faster and the
+same size, but it **crashed on a real 4h stream**: after ~3h13m at 25x it aborted
+with `Assertion s->buf_ptr < s->buf_end failed at libavcodec/put_bits.h:160`,
+leaving a 28 GB file with no `moov` atom - completely unplayable. A 60-second
+benchmark did not surface this. Use it only for short clips (<10 min), never as
+the documented default.
+
+```bash
+ffmpeg -y -i INPUT -c:v dnxhd -profile:v dnxhr_lb -pix_fmt yuv422p -c:a pcm_s16le OUTPUT.mov
+```
+
+**ProRes 422** - only for a final deliverable that needs it. ~3x the size (~114 GB
+for a 4h stream) and much slower.
+
+```bash
+ffmpeg -y -i INPUT -c:v prores_ks -profile:v 2 -pix_fmt yuv422p -c:a pcm_s16le OUTPUT.mov
+```
+
+- `-pix_fmt yuv422p` - required; ProRes 422 needs 4:2:2 chroma. Most phone and OBS
+  sources are `yuv420p`, so this is a real conversion, not a passthrough.
+- `-c:a pcm_s16le` - PCM audio. AAC will not decode in free Resolve on Linux.
+- ProRes profiles: 0=proxy, 1=LT, 2=422, 3=HQ, 4/5=4444 variants
+
+### Long transcodes
+A 4h stream is a 10+ minute job. Launch it detached or the shell tool will kill the
+process group on timeout:
+
+```bash
+setsid nohup ffmpeg -y -i INPUT -c:v dnxhd -profile:v dnxhr_lb \
+  -pix_fmt yuv422p -c:a pcm_s16le OUTPUT.mov \
+  > /tmp/opencode/transcode.log 2>&1 < /dev/null &
+disown
+```
+
+Verify it survived with `pgrep -af dnxhr_lb`, and confirm the output decodes before
+trusting it: `ffmpeg -v error -i OUTPUT.mov -f null -`.
 
 ### Destination
-- Move converted files to: `~/Videos/`
-- Maintain original filename (change extension from any format to `.mov`)
+- Move converted deliverables to: `~/Videos/`
+- For large stream working copies (multi-GB, not deliverables), use
+  `~/Videos/obs_footage/edit/` so they sit next to the source and its SRT
+- Suffix editable working copies with `_edit`, e.g. `<STREAM>_edit.mov`
 - If a file with the same name exists, ask the user before overwriting
 
 ### Workflow
-1. Identify source `.mov` files in `~/Downloads/` or user-specified location
-2. Convert each file using the FFmpeg command above
-3. Move the converted file to `~/Videos/`
-4. Report completion with file sizes and location
+1. Identify source files in `~/Downloads/`, `~/Videos/obs_footage/`, or a
+   user-specified path. Check codecs with `ffprobe` rather than assuming from the
+   file extension.
+2. Convert using the DNxHR LB template above.
+3. Verify the result: `ffmpeg -v error -i OUTPUT.mov -f null -` must be silent.
+4. Report completion with file size and location.
+5. Never delete or overwrite the original source without asking.
 
 ### Notes
-- The original phone recordings are ProRes HQ which DaVinci accepts but files are very large
-- Converting to ProRes 422 reduces file size significantly while remaining professional quality
-- For YouTube clips (H.265/HEVC in MP4), use: `ffmpeg -i input.mp4 -c:v prores_ks -profile:v 2 -c:a pcm_s16le output.mov`
+- ProRes HQ phone footage *is* decodable by free Resolve on Linux - the conversion
+  there is purely to cut file size. H.264/H.265 and AAC are not decodable at all.
+- Do not trust cross-platform advice: H.264 plays in free Resolve on Windows/macOS
+  purely because the OS bundles the decoder.
+- Subtitle workflows are unaffected by any of this. An SRT is just a text file and
+  needs no video transcoding to exist, import, or be styled.
+
+---
+
+## Stream deliverables: long form and shorts
+
+The user edits in DaVinci Resolve. This section defines what to hand them and how
+subtitles apply to each output.
+
+### The three artifacts
+
+One source stream produces three independent files. **Nothing is baked into
+anything else.**
+
+```
+~/Videos/obs_footage/<STREAM>.mp4                     source - never modified
+~/Videos/obs_footage/edit/<STREAM>_prores.mov         editable master - NO subs
+~/Videos/obs_footage/subtitles/<STREAM>.srt           full soft subtitle track
+```
+
+The master must **never** have subtitles burned in. Doing so would ruin the long
+form and remove the user's choice. Subtitles are applied per-render, at export.
+
+| Output | Subs | How |
+|---|---|---|
+| **Long form** | none | Deliver → Subtitle Settings → leave *Export Subtitle* **unticked** |
+| **Shorts** | burned in | Deliver → Subtitle Settings → tick *Export Subtitle* → **Burn into video** |
+
+Both come from the **same timeline, same master**. The only difference is one
+checkbox at render time, so the user never needs a duplicate project.
+
+### Burning subtitles into shorts
+
+This is a **render setting, not an import setting**:
+
+1. Media Pool → import `<STREAM>_prores.mov` → drag to timeline at **`00:00:00:00`**
+2. Media Pool → right-click `<STREAM>.srt` → **Import Subtitle**
+3. Style the track: Inspector → **Track** tab (font, size, colour, position, stroke)
+4. Cut the short in the Edit page; **Mark In/Out** around it
+5. **Deliver** page → **Video** tab → scroll to **Subtitle Settings**
+6. Tick **Export Subtitle**, dropdown → **Burn into video**
+7. Render (marked range only)
+
+Alternative in the same panel: **Export as SRT File** instead. That uploads a soft
+subtitle track rather than burning text in. Burned-in is the safe default for
+autoplay/muted viewing; soft lets the user fix a typo without re-rendering.
+
+### CRITICAL: cut shorts on the full-length timeline
+
+The SRT is timed against the **full stream clock**. If the user copies a clip into
+a new timeline to make a short, that timeline starts at `00:00:00:00` while the cues
+are stamped at their original position (e.g. `01:12:03`). Result: **subtitles
+missing or badly misplaced.**
+
+Correct approach: keep cutting on the full-length master timeline so the stream
+clock is preserved, then Mark In/Out and render just that range. Cues stay aligned
+automatically because the timeline *is* the stream's clock.
+
+Only copy a clip into a separate timeline if the user also re-times the cues by hand.
+
+### Slicing the SRT without re-running whisper
+
+Because the SRT covers the whole stream, the user does **not** need a separate
+whisper run per short. Search the SRT text to find a moment, then cut that range
+in Resolve. If they ever do need a trimmed SRT as a standalone file, cut on the
+stream clock (same rule as above) and export from Resolve.
 
 ---
 
@@ -85,8 +221,9 @@ YouTube upload, follow these instructions:
 - Any similar request about converting edited videos for YouTube
 
 ### Source Files
-- Location: `~/Videos/` (edited ProRes files from DaVinci)
-- Format: `.mov` files (ProRes 422 or ProRes HQ)
+- Location: `~/Videos/` or `~/Videos/obs_footage/edit/`
+- Format: `.mov` files - **ProRes Proxy, ProRes 422, or DNxHR LB**. Do not assume
+  ProRes 422 specifically; the editable master defaults to ProRes Proxy.
 
 ### Conversion Settings
 - **Output codec**: H.264 (MP4 container) - universally accepted by YouTube
@@ -112,18 +249,29 @@ ffmpeg -i INPUT.mov -c:v libx264 -crf 18 -preset slow -pix_fmt yuv420p -movflags
 - Append `_youtube` to filename (e.g., `20260712_135905_youtube.mp4`)
 - If a file with the same name exists, ask the user before overwriting
 
+### Subtitle handling on export
+
+ffmpeg burn-in is **not** recommended here - the SRT is timed to the full stream
+clock, so on a trimmed clip the cues land in the wrong place or nowhere at all.
+The user burns subtitles in **Resolve**, at render time, using Deliver → Video tab
+→ Subtitle Settings → Export Subtitle → Burn into video. See
+[Stream deliverables](#stream-deliverables-long-form-and-shorts).
+
+This YouTube export step is for **clean video without subtitles** - the long form
+case. For shorts with burned-in subs, export from Resolve instead.
+
 ### Cleanup
-- **Delete the source ProRes `.mov` files after successful conversion**
-- ProRes files are very large (often 5-15 GB each)
-- Always confirm with user before deleting
-- Report space freed
+- **Never delete the editable master automatically.** A 4h master is ~36 GB and is
+  the only Resolve-editable copy; the user may still need it for further cuts.
+- Never delete the original source MP4, ever.
+- Always ask before deleting anything, and report space freed if confirmed.
 
 ### Workflow
-1. Identify source `.mov` files in `~/Videos/` or user-specified location
-2. Convert each file using the FFmpeg command above
+1. Identify source `.mov` files in `~/Videos/` or `~/Videos/obs_footage/edit/`
+2. Convert each using the FFmpeg command above (no subtitles - see above)
 3. Save converted `.mp4` to `~/Videos/` with `_youtube` suffix
-4. Ask user to confirm deletion of source ProRes files
-5. Delete confirmed files and report space saved
+4. Report the output and confirm the master is still in place
+5. Delete nothing without explicit confirmation
 
 ---
 
