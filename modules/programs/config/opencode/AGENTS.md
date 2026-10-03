@@ -70,16 +70,55 @@ Full detail (quality caveats, Resolve import steps, flag notes) is in the
 
 ## Other video workflows
 Resolve-compatible transcoding and YouTube export recipes are in the `video` skill.
-Load it rather than improvising ffmpeg settings. Default to **ProRes Proxy**
-(`-c:v prores_ks -profile:v 0`). DNxHR LB is a fallback only: it hit an ffmpeg
-assertion failure on a 4h stream and left an unplayable file.
+Load it rather than improvising ffmpeg settings.
+
+Default to **ProRes Proxy**. DNxHR LB is a fallback only: it hit an ffmpeg assertion
+failure on a 4h stream and left an unplayable file.
+
+### CRITICAL: never transcode video and audio in one ffmpeg command
+
+A single-pass command **silently truncates the audio** on long sources. It exits 0,
+prints no error, and produces a file with complete video and partial audio. This
+already produced two broken masters (21 GB and 34 GB) that had to be rebuilt.
+
+```bash
+# WRONG - truncates audio, silently
+ffmpeg -i IN -c:v prores_ks -profile:v 0 -c:a pcm_s16le OUT.mov
+
+# RIGHT - three passes, mux with -c copy
+ffmpeg -i IN -map 0:v:0 -c:v prores_ks -profile:v 0 -pix_fmt yuv422p10le /tmp/_v.mov
+ffmpeg -i IN -map 0:a:0 -c:a pcm_s16le /tmp/_a.wav
+ffmpeg -i /tmp/_v.mov -i /tmp/_a.wav -c copy -map 0:v:0 -map 1:a:0 OUT.mov
+```
+
+### CRITICAL: verify audio duration, not just decode
+
+`ffmpeg -v error -f null` only proves nothing *errored*. Truncated audio decodes
+completely silently. It passed on both broken masters. Always compare per-stream
+durations and report the real numbers:
+
+```bash
+ffprobe -v error -select_streams v:0 -show_entries stream=duration -of csv=p=0 OUT.mov
+ffprobe -v error -select_streams a:0 -show_entries stream=duration -of csv=p=0 OUT.mov
+ffmpeg -v error -i OUT.mov -map 0:a -f s16le - 2>/dev/null | wc -c
+```
+
+Audio duration shorter than video duration means a truncated master. Rebuild it.
+Never report a transcode complete on a silent decode alone.
+
+Prefer the bundled checker, which runs every check and exits non-zero on failure:
+
+```bash
+~/.opencode/scripts/verify_master.sh OUTPUT.mov SOURCE.m4v
+```
 
 ## Long form vs shorts (same master)
 User cuts in Resolve. One master + one full-length SRT serves both outputs; the
 SRT must **never** be burned in during transcoding.
 
 - "make it editable" / "make stream editable for davinci" -> produce a ProRes Proxy
-  master in `~/Videos/obs_footage/edit/`, keep subtitles out of it
+  master in `~/Videos/obs_footage/edit/`, keep subtitles out of it, **three-pass**
+  (video, audio, mux) per the rules above
 - **Long form** -> Deliver → Subtitle Settings → leave *Export Subtitle* unticked
 - **Shorts** -> tick *Export Subtitle* → **Burn into video**, render marked range
 - Both render from the **same timeline**; it is one checkbox difference

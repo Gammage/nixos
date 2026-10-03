@@ -82,6 +82,7 @@
       # the ~/.opencode path does not. Do not add instructions to that path.
       ".config/opencode/AGENTS.md".source = ./programs/config/opencode/AGENTS.md;
       ".opencode/skills".source = ./programs/config/opencode/skills;
+      ".opencode/scripts".source = ./programs/config/opencode/scripts;
       ".config/opencode/opencode.json".source = ./programs/config/opencode/opencode.json;
     };
 

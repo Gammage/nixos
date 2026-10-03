@@ -73,11 +73,57 @@ follow these instructions:
 
 ### FFmpeg Command Templates
 
-**Default - ProRes Proxy.** Measured on this machine (Ryzen 7 5800X, 720p30 source):
-**~3.1-3.4x realtime**, ~20 Mbps, so a 4h stream takes ~76 min and lands ~36 GB.
+**Default - ProRes Proxy, TWO PASSES.** Measured on this machine (Ryzen 7 5800X,
+720p30 source): **~3.1-3.4x realtime** on the video pass, ~20 Mbps, so a 4h stream
+takes ~76 min and lands ~36 GB.
+
+**NEVER combine video and audio in a single ffmpeg command.** A single-pass
+`ffmpeg -i IN -c:v prores_ks -c:a pcm_s16le OUT.mov` **silently truncates the audio
+track** on long sources. See "Audio truncation bug" below - this is the single most
+important rule in this skill.
 
 ```bash
-ffmpeg -y -i INPUT -c:v prores_ks -profile:v 0 -pix_fmt yuv422p -c:a pcm_s16le OUTPUT.mov
+# Pass 1: video only (the slow part)
+ffmpeg -y -i INPUT -map 0:v:0 -c:v prores_ks -profile:v 0 -pix_fmt yuv422p10le /tmp/_v.mov
+
+# Pass 2: audio only, to WAV (seconds, not minutes)
+ffmpeg -y -i INPUT -map 0:a:0 -c:a pcm_s16le /tmp/_a.wav
+
+# Pass 3: mux without re-encoding (-c copy, so nothing is re-processed)
+ffmpeg -y -i /tmp/_v.mov -i /tmp/_a.wav -c copy -map 0:v:0 -map 1:a:0 OUTPUT.mov
+```
+
+Verified correct on this machine: 1200 s source -> video 1200.000, audio 1200.000,
+230400000 audio bytes (exactly 1200 x 48000 x 2ch x 2bytes).
+
+#### Audio truncation bug (cost two 21 GB/34 GB masters)
+
+**Symptom:** video complete, audio stops partway. Exits 0, zero errors, `moov`
+present, `ffmpeg -f null` decode silent.
+
+| Stream | video | audio | audio bytes |
+|---|---|---|---|
+| 10-02 master | 2:39:02 OK | **0:42:16** truncated | 487 MB of 1832 MB |
+| 10-01 master | 3:53:08 OK | **0:47:39** truncated | - |
+| both sources | full OK | **full OK** | 1832087552 (complete) |
+
+**Cause:** ffmpeg 9.0.1 stops feeding the audio encoder on long single-pass jobs and
+**reports nothing**. The AAC decoder has no threading, so it cannot keep up with the
+ProRes encoder consuming the stream. Reproduced deterministically: a 3000 s
+single-pass run produced video 3000.000 / audio 2621.248 - 378 s short.
+
+**Why it survived earlier verification:** `ffmpeg -v error -f null` only proves there
+were no *decode errors*. Silence and truncation produce zero errors. Duration was
+also only ever checked on the **video** stream. Both checks must change - see
+"Verification" below.
+
+**Consequence:** every master made before this fix is suspect. Do not trust any
+single-pass ProRes/DNxHR master built here.
+
+```bash
+# NEVER use these
+ffmpeg -i IN -c:v prores_ks -profile:v 0 -c:a pcm_s16le OUT.mov     # WRONG
+ffmpeg -i IN -c:v dnxhd -profile:v dnxhr_lb -c:a pcm_s16le OUT.mov  # WRONG
 ```
 
 **DNxHR LB - fallback only, NOT the default.** It is roughly 6x faster and the
@@ -88,18 +134,20 @@ benchmark did not surface this. Use it only for short clips (<10 min), never as
 the documented default.
 
 ```bash
-ffmpeg -y -i INPUT -c:v dnxhd -profile:v dnxhr_lb -pix_fmt yuv422p -c:a pcm_s16le OUTPUT.mov
+ffmpeg -y -i INPUT -map 0:v:0 -c:v dnxhd -profile:v dnxhr_lb -pix_fmt yuv422p10le /tmp/_v.mov
+# then the same audio + mux passes as the ProRes Proxy template
 ```
 
 **ProRes 422** - only for a final deliverable that needs it. ~3x the size (~114 GB
-for a 4h stream) and much slower.
+for a 4h stream) and much slower. Two-pass only, as above.
 
 ```bash
-ffmpeg -y -i INPUT -c:v prores_ks -profile:v 2 -pix_fmt yuv422p -c:a pcm_s16le OUTPUT.mov
+# pass 1: -c:v prores_ks -profile:v 2 -pix_fmt yuv422p10le  -> /tmp/_v.mov
+# pass 2: -c:a pcm_s16le -> /tmp/_a.wav   pass 3: -c copy mux -> OUTPUT.mov
 ```
 
-- `-pix_fmt yuv422p` - required; ProRes 422 needs 4:2:2 chroma. Most phone and OBS
-  sources are `yuv420p`, so this is a real conversion, not a passthrough.
+- `-pix_fmt yuv422p10le` - required; ProRes 422 needs 4:2:2 chroma. Most phone and
+  OBS sources are `yuv420p`, so this is a real conversion, not a passthrough.
 - `-c:a pcm_s16le` - PCM audio. AAC will not decode in free Resolve on Linux.
 - ProRes profiles: 0=proxy, 1=LT, 2=422, 3=HQ, 4/5=4444 variants
 
@@ -108,14 +156,53 @@ A 4h stream is a 10+ minute job. Launch it detached or the shell tool will kill 
 process group on timeout:
 
 ```bash
-setsid nohup ffmpeg -y -i INPUT -c:v dnxhd -profile:v dnxhr_lb \
-  -pix_fmt yuv422p -c:a pcm_s16le OUTPUT.mov \
-  > /tmp/opencode/transcode.log 2>&1 < /dev/null &
+setsid nohup bash -c '
+SRC=INPUT
+ffmpeg -y -v error -i "$SRC" -map 0:v:0 -c:v prores_ks -profile:v 0 \
+  -pix_fmt yuv422p10le /tmp/_v.mov
+ffmpeg -y -v error -i "$SRC" -map 0:a:0 -c:a pcm_s16le /tmp/_a.wav
+ffmpeg -y -v error -i /tmp/_v.mov -i /tmp/_a.wav -c copy \
+  -map 0:v:0 -map 1:a:0 OUTPUT.mov
+rm -f /tmp/_v.mov /tmp/_a.wav
+echo BUILD_DONE
+' > /tmp/opencode/transcode.log 2>&1 < /dev/null &
 disown
 ```
 
-Verify it survived with `pgrep -af dnxhr_lb`, and confirm the output decodes before
-trusting it: `ffmpeg -v error -i OUTPUT.mov -f null -`.
+Build to a temp/`_NEW` name and rename after verification. Never overwrite the only
+copy before the new file has passed its checks - if a transcode dies halfway, an
+overwrite leaves nothing at all.
+
+Verify it survived with `pgrep -af prores_ks`, then run the **full verification**
+below. A silent decode is NOT sufficient - that check passed on both broken masters.
+
+### Verification (mandatory, every transcode)
+
+Run **all** of these. A transcode is not done until audio duration matches video
+duration. Report actual numbers, never just "OK".
+
+```bash
+# 1. Per-stream duration, compared separately. THE check that catches truncation.
+ffprobe -v error -select_streams v:0 -show_entries stream=duration -of csv=p=0 OUT.mov
+ffprobe -v error -select_streams a:0 -show_entries stream=duration -of csv=p=0 OUT.mov
+#    Both must match the source within ~1s. Audio shorter than video = TRUNCATED.
+
+# 2. Audio byte count proves samples exist end to end, not just at the start.
+ffmpeg -v error -i OUT.mov -map 0:a -f s16le - 2>/dev/null | wc -c
+#    Expected = duration * 48000 * 2ch * 2bytes. (10-02: 9542s -> ~1832087552)
+
+# 3. Decode an audio probe PAST the expected end (catches truncation directly).
+ffmpeg -v error -ss <last_60s_before_end> -i OUT.mov -map 0:a -t 5 -f s16le - 2>/dev/null | wc -c
+#    Must be non-zero. Returns 0 bytes on a truncated master.
+
+# 4. Video decode clean + moov present
+ffprobe -v error -show_entries format=duration -of csv=p=0 OUT.mov
+ffmpeg -v error -i OUT.mov -f null - 2>&1 | head   # silent = no decode errors
+```
+
+**A silent decode proves only that nothing errored.** Truncated audio, all-silent
+audio, and a 20 ms file all decode silently. Never report a transcode complete on
+that alone.
 
 ### Destination
 - Move converted deliverables to: `~/Videos/`
@@ -128,12 +215,17 @@ trusting it: `ffmpeg -v error -i OUTPUT.mov -f null -`.
 1. Identify source files in `~/Downloads/`, `~/Videos/obs_footage/`, or a
    user-specified path. Check codecs with `ffprobe` rather than assuming from the
    file extension.
-2. Convert using the DNxHR LB template above.
-3. Verify the result: `ffmpeg -v error -i OUTPUT.mov -f null -` must be silent.
-4. Report completion with file size and location.
-5. Never delete or overwrite the original source without asking.
+2. Record source per-stream durations first - you need them to verify against.
+3. Convert using the **two-pass** template above. Never single-pass.
+4. Run **every** check in "Verification" and report the real numbers.
+5. Report completion with file size and location.
+6. Never delete or overwrite the original source without asking.
 
 ### Notes
+- `-pix_fmt yuv422p10le` - use the 10-bit form. ffmpeg auto-selects it for
+  `prores_ks` and warns on the bare `yuv422p`.
+- `-map 0:v:0` / `-map 0:a:0` - explicit stream mapping in every pass. Prevents
+  ffmpeg picking up unexpected streams.
 - ProRes HQ phone footage *is* decodable by free Resolve on Linux - the conversion
   there is purely to cut file size. H.264/H.265 and AAC are not decodable at all.
 - Do not trust cross-platform advice: H.264 plays in free Resolve on Windows/macOS
