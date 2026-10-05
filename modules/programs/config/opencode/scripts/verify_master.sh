@@ -20,8 +20,22 @@ echo "=== verifying: $OUT"
 echo "size: $(ls -lh "$OUT" | awk '{print $5}')"
 echo
 
+# Duration of one stream, falling back to the container value.
+# Matroska/WebM (and fragmented MP4) store duration at container level only, so
+# per-stream duration probes return "N/A". Comparing against that produced a
+# false "FAILED - do not use this master" on a verified-good 9s meme clip.
+dur() { # dur <file> <v:0|a:0>
+  local d
+  d=$(ffprobe -v error -select_streams "$2" -show_entries stream=duration \
+        -of csv=p=0 "$1" 2>/dev/null)
+  case "$d" in
+    ''|N/A|n/a) d=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$1" 2>/dev/null) ;;
+  esac
+  printf '%s' "$d"
+}
+
 # ---- video ----
-VD=$(ffprobe -v error -select_streams v:0 -show_entries stream=duration -of csv=p=0 "$OUT" 2>&1)
+VD=$(dur "$OUT" v:0)
 VC=$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of csv=p=0 "$OUT" 2>&1)
 echo "video: codec=$VC duration=$VD"
 case "$VD" in
@@ -29,7 +43,7 @@ case "$VD" in
 esac
 
 # ---- audio ----
-AD=$(ffprobe -v error -select_streams a:0 -show_entries stream=duration -of csv=p=0 "$OUT" 2>&1)
+AD=$(dur "$OUT" a:0)
 AC=$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 "$OUT" 2>&1)
 echo "audio: codec=$AC duration=$AD"
 case "$AD" in
@@ -91,8 +105,8 @@ echo "moov atom present: $MOOV"
 # ---- compare against source if given ----
 if [ -n "$SRC" ] && [ -s "$SRC" ]; then
   echo
-  SV=$(ffprobe -v error -select_streams v:0 -show_entries stream=duration -of csv=p=0 "$SRC" 2>&1)
-  SA=$(ffprobe -v error -select_streams a:0 -show_entries stream=duration -of csv=p=0 "$SRC" 2>&1)
+  SV=$(dur "$SRC" v:0)
+  SA=$(dur "$SRC" a:0)
   echo "source video: $SV"
   echo "source audio: $SA"
   awk -v a="$AD" -v s="$SA" 'BEGIN{d=(a-s); if(d<0)d=-d; if(d>1){print "FAIL: audio duration differs from source by "d"s"; exit 1}}' || FAIL=1

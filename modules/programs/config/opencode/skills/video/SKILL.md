@@ -1,6 +1,6 @@
 ---
 name: video
-description: Use for video and subtitle workflows on this machine - converting ProRes clips for DaVinci Resolve, exporting to YouTube, or generating SRT subtitles for OBS streams with whisper-cpp. Triggers on "reformat videos for davinci", "export for youtube", "add subtitles to my stream", "transcribe this stream", "get an srt for this recording", "caption my obs footage", "whisper this".
+description: Use for video and subtitle workflows on this machine - converting ProRes clips and yt-dlp/YouTube downloads for DaVinci Resolve, exporting to YouTube, or generating SRT subtitles for OBS streams with whisper-cpp. Triggers on "reformat videos for davinci", "export for youtube", "add subtitles to my stream", "transcribe this stream", "get an srt for this recording", "caption my obs footage", "whisper this", "no audio in resolve", "clip has no audio", "meme clip silent", "b-roll from youtube".
 ---
 
 # Video workflows
@@ -13,6 +13,7 @@ loaded; this skill is the supported location.
 | "make stream editable for davinci" | [Resolve conversion](#resolve-conversion) |
 | Any H.264/H.265/AAC media -> editable for Resolve | [Resolve conversion](#resolve-conversion) |
 | Phone ProRes clips -> smaller editable copy | [Resolve conversion](#resolve-conversion) |
+| **yt-dlp / YouTube download has no audio in Resolve** | **[yt-dlp downloads](#yt-dlp-downloads)** |
 | Long form (no subs) vs shorts (burned-in subs) | [Stream deliverables](#stream-deliverables-long-form-and-shorts) |
 | Finished edit -> YouTube upload | [YouTube export](#youtube-export) |
 | Stream recording -> subtitles (SRT) | [Subtitles for OBS streams](#subtitles-for-obs-streams) |
@@ -23,22 +24,70 @@ loaded; this skill is the supported location.
 
 ### Critical: free edition codec limits on Linux
 
-**Free Resolve on Linux cannot decode H.264/H.265 video or AAC audio.**
-Blackmagic staff, verbatim: "H.264/265 files are not supported in free Resolve on
-Linux. They require the Studio version. That's why you only see the audio portion
-of the files." AAC is unsupported for the same MPEG patent licensing reason.
+**Blackmagic ships a deliberately stripped decoder set in the Linux build.** Measured
+on this machine against Resolve 21.1's own bundled `libavcodec.so.60`
+(`/nix/store/5f3jq4d73534mfbkhl739cml1wbd6b17-davinci-resolve-21.1/libs/`):
 
-Symptom: the clip imports, an audio track appears, and the viewer stays black.
-No error dialog. Do not go chasing GPU or driver settings - the codecs are simply
-absent from the free Linux build.
+| codec | decoder | codec | decoder |
+|---|---|---|---|
+| **opus** | **MISSING** | mp3 | OK |
+| **aac** | **MISSING** | flac | OK |
+| av1 | OK | vorbis | OK |
+| h264 | OK | alac | OK |
+| hevc | OK | ac3 | OK |
+| prores | OK | pcm_s16le | OK |
+| dnxhd | OK | pcm_s24le | OK |
 
-This is **Linux-specific**. Windows and macOS free Resolve play H.264 fine because
-the OS bundles the decoders, so guidance written for those platforms is wrong here.
+Only **Opus and AAC** are absent - the patent/licensing-encumbered pair. Every
+other common codec decodes.
 
-Consequence: **every** source needs transcoding to ProRes or DNxHR video plus
-`pcm_s16le` audio before it can be edited. That includes phone footage in
-`~/Downloads/` (ProRes HQ decodes fine but is enormous), phone clips in H.265 MP4,
-and OBS stream recordings in `~/Videos/obs_footage/`.
+**Re-measure before asserting anything about codecs.** Do not trust prose
+(including older versions of this skill) about what Resolve can and cannot
+decode. Ask the library directly:
+
+```bash
+python3 - <<'EOF'
+import ctypes
+lib = ctypes.CDLL("/nix/store/5f3jq4d73534mfbkhl739cml1wbd6b17-davinci-resolve-21.1/libs/libavcodec.so.60")
+lib.avcodec_find_decoder_by_name.restype = ctypes.c_void_p
+lib.avcodec_find_decoder_by_name.argtypes = [ctypes.c_char_p]
+for n in [b"opus",b"aac",b"av1",b"h264",b"hevc",b"mp3",b"flac",b"vorbis",b"alac",b"ac3",b"pcm_s16le",b"prores",b"dnxhd"]:
+    print(n.decode(), "OK" if lib.avcodec_find_decoder_by_name(n) else "MISSING")
+EOF
+```
+
+Resolve's path changes when the nixpkgs hash changes; re-run `ls -d
+/nix/store/*davinci-resolve-21*` if it errors.
+
+**Symptom of a missing decoder:** the clip imports, an audio track appears on the
+timeline, and the waveform is flat. Video plays fine. **No error dialog.** Do not
+chase GPU or driver settings - do not "fix" the source - the decoder is simply
+absent from the build.
+
+**Two separate layers, do not conflate them:**
+1. *libavcodec decoder presence* - what the table above measures.
+2. *Resolve's codec repository gate* - logs `Codec (avc1) not Found in Repository`
+   (`~/.local/share/DaVinciResolve/logs/ResolveDebug.txt`) even where a decoder
+   exists. H.264 sources from OBS/phone have hit this. Treat a repository error as
+   authoritative for that clip: transcode it.
+
+**Runtime confirmation from the log** - check this first for any silent-audio
+report, it names the file and track directly:
+
+```bash
+rg -n "Failed to decode the audio samples|not Found in Repository|FolderEntry failed" \
+  ~/.local/share/DaVinciResolve/logs/ResolveDebug.txt | tail -20
+```
+
+This is **Linux-specific**. Windows and macOS builds ship wider codec sets, so
+guidance written for those platforms is wrong here.
+
+Not fixable in the Nix config: `modules/programs/davinci-resolve.nix` just unpacks
+Blackmagic's official archive, so the missing decoders are absent at the source.
+
+Consequence: any source whose audio is **Opus or AAC** must be transcoded to
+`pcm_s16le` before editing. That covers all yt-dlp downloads and all OBS/phone
+recordings. Sources that are already ProRes/DNxHR + PCM are fine.
 
 When the user requests to reformat or convert video clips for DaVinci Resolve,
 follow these instructions:
@@ -55,11 +104,16 @@ follow these instructions:
 - Any similar request about making a video editable in DaVinci Resolve
 
 ### Source Files
-- Location: `~/Downloads/`, `~/Videos/obs_footage/`, or a user-specified path
-- Format: **anything free Resolve on Linux cannot decode directly**:
+- Location: `~/Downloads/`, `~/Videos/obs_footage/`, `~/Videos/footage/`, or a
+  user-specified path. For yt-dlp downloads see [yt-dlp downloads](#yt-dlp-downloads).
+- Format: check with `ffprobe`, never assume from the extension. Needs converting:
+  - anything with **Opus or AAC** audio (all yt-dlp downloads, OBS MP4s)
+  - anything the log reports `not Found in Repository` for
   - Phone ProRes HQ `.mov` - decodes fine, but enormous; convert to shrink
-  - Phone H.264 / H.265 (HEVC) in MP4 - will not decode at all
-  - OBS stream H.264 + AAC in MP4 - will not decode at all
+- Already fine, no conversion needed:
+  - ProRes or DNxHR + `pcm_s16le`/PCM audio (e.g. `~/Videos/footage/channel_update_vid_edit.mov`)
+  - `.mp3` audio (mp3 decoder present)
+  - AV1 video + PCM audio
 - Note the user may ask for subtitles *and* an editable copy. These are separate
   deliverables: the SRT is already complete and needs no re-encoding, but the video
   still needs transcoding to become editable. Never treat one as implying the other.
@@ -227,11 +281,105 @@ that alone.
 - `-map 0:v:0` / `-map 0:a:0` - explicit stream mapping in every pass. Prevents
   ffmpeg picking up unexpected streams.
 - ProRes HQ phone footage *is* decodable by free Resolve on Linux - the conversion
-  there is purely to cut file size. H.264/H.265 and AAC are not decodable at all.
-- Do not trust cross-platform advice: H.264 plays in free Resolve on Windows/macOS
-  purely because the OS bundles the decoder.
+  there is purely to cut file size.
+- Only Opus and AAC audio are undecodable; see the decoder table at the top of
+  this section. Re-measure it rather than trusting this sentence.
+- Do not trust cross-platform advice about what free Resolve can play.
 - Subtitle workflows are unaffected by any of this. An SRT is just a text file and
   needs no video transcoding to exist, import, or be styled.
+- Prefer `~/.opencode/scripts/verify_master.sh OUT.mov SOURCE` over hand-running
+  the checks. It runs every one and exits non-zero on failure.
+
+---
+
+## yt-dlp downloads
+
+Short clips pulled from YouTube with `yt-dlp` land in `~/Videos/footage/` (b-roll,
+memes, `b-roll/memes/`). **These are the single most likely thing to hit "no audio in
+Resolve",** because yt-dlp's default output is exactly the codec pair Resolve lacks.
+
+### Why the audio is missing
+
+`yt-dlp` 2026.08.19 with no `~/.config/yt-dlp/config` (none exists) defaults to
+**AV1 video + Opus audio in a `.webm`** container. Resolve's bundled libavcodec has
+**no Opus decoder**, so:
+
+- video imports and plays (AV1 decoder present)
+- audio track appears on the timeline with a **flat waveform**
+- no error dialog, no warning in the UI
+- `ResolveDebug.txt` shows nothing for the file unless the media pool also failed
+
+**Do not assume the download is broken.** Confirm the audio is really there before
+blaming yt-dlp:
+
+```bash
+SRC="path/to/clip.webm"
+ffprobe -v error -show_entries stream=codec_name,codec_type,sample_rate,channels \
+  -of default=nw=1 "$SRC"
+# bytes decoded vs expected proves samples exist end to end:
+ffmpeg -v error -i "$SRC" -map 0:a -f s16le - 2>/dev/null | wc -c
+# expected = duration * 48000 * 2ch * 2bytes
+# per-second levels prove it is not silence:
+ffmpeg -v error -i "$SRC" -map 0:a \
+  -af "asetnsamples=n=48000,astats=metadata=1:reset=1,ametadata=print:key=lavfi.astats.Overall.RMS_level:file=-" \
+  -f null - 2>/dev/null | head
+```
+
+Worked example, `footage/b-roll/memes/That is One Big Pile of Shit [nnun8y7r8_U].webm`:
+AV1 854x480 + Opus 48k stereo, 9.009 s, 1,725,336 audio bytes decoded vs 1,729,728
+expected, RMS -42 to -62 dB across all 9 s. Audio present and complete - purely a
+Resolve decoder gap.
+
+### The fix
+
+No `yt-dlp` flag solves this: `--audio-format wav` decodes via ffmpeg but drops the
+video and leaves you re-syncing by hand, and `-f "bestaudio[acodec^=mp4a]"` just
+swaps Opus for AAC, which is *also* missing. **Transcode to PCM.**
+
+Follow [Resolve conversion](#resolve-conversion) - same ProRes Proxy + `pcm_s16le`
+settings and the same mandatory three passes:
+
+```bash
+SRC="/path/to/clip.webm"
+OUT="$(dirname "$SRC")/$(basename "${SRC%.*}")_edit.mov"
+
+ffmpeg -y -v error -i "$SRC" -map 0:v:0 -c:v prores_ks -profile:v 0 \
+  -pix_fmt yuv422p10le /tmp/_v.mov
+ffmpeg -y -v error -i "$SRC" -map 0:a:0 -c:a pcm_s16le /tmp/_a.wav
+ffmpeg -y -v error -i /tmp/_v.mov -i /tmp/_a.wav -c copy \
+  -map 0:v:0 -map 1:a:0 "$OUT"
+rm -f /tmp/_v.mov /tmp/_a.wav
+
+~/.opencode/scripts/verify_master.sh "$OUT" "$SRC"
+```
+
+Never single-pass these - the audio-truncation bug in
+[Resolve conversion](#resolve-conversion) applies to any source.
+
+### Destination
+
+**Write the `_edit.mov` into the same directory as the source**, not `~/Videos/`.
+These are short b-roll clips that belong in their themed folder
+(`b-roll/memes/`, `a-roll/`, `audio/`) next to their siblings, and the user groups
+them by hand. Keep the original `.webm`/`.mkv` - it is the download of record.
+
+### Notes
+
+- Short clips finish in seconds; run them in the foreground, no `setsid` needed.
+- `verify_master.sh` compares against the **source**, and WebM/Matroska report
+  per-stream duration as `N/A` (duration lives at container level). The script falls
+  back to `format=duration`; if you see
+  `FAIL: ... differs from source by 9.009s`, that is the fallback failing, not a
+  bad master. Confirm with the per-stream durations of `OUT` and the byte count.
+- Opus frame boundaries mean audio duration lands a few ms under video
+  (9.009 vs 8.986 on the example above). A gap under ~1 s is correct; over 1 s is
+  truncation.
+- Known silent file: `footage/audio/remember who you are "Bok." [56I6VP64ko8].mkv`
+  (h264 + opus, 4.921 s). Converted only if asked - the user had not requested it
+  as of 2026-10-05.
+- `footage/audio/*.mp3` needs no conversion (mp3 decoder present).
+- After converting, the new `.mov` is a **different media ID** in the Media Pool.
+  Tell the user to relink the timeline clip rather than just re-importing.
 
 ---
 
