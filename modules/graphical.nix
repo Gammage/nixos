@@ -29,6 +29,7 @@
 
     fonts.packages = with pkgs; [
       nerd-fonts.hurmit
+      roboto
     ];
   };
 
