@@ -36,12 +36,20 @@ in {
          };
        })
 
-       ({ lib, ... }: {
-         services.xserver.windowManager.i3.enable = true;
-         services.displayManager.autoLogin.enable = true;
-         services.displayManager.autoLogin.user = "ben";
-         services.displayManager.defaultSession = "none+i3";
-       })
+        ({ lib, ... }: {
+          services.xserver.windowManager.i3.enable = true;
+          services.displayManager.autoLogin.enable = true;
+          services.displayManager.autoLogin.user = "ben";
+          services.displayManager.defaultSession = "none+i3";
+        })
+
+        {
+          fileSystems."/mnt/media" = {
+            device = "/dev/disk/by-uuid/A090D9D090D9AD52";
+            fsType = "ntfs3";
+            options = [ "uid=1000" "gid=100" "nofail" ];
+          };
+        }
 
 	./_nix/hardware-configuration.nix	
     ];

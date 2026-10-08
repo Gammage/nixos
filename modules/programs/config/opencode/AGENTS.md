@@ -68,12 +68,51 @@ Four traps that have already cost time:
 Full detail (quality caveats, Resolve import steps, flag notes) is in the
 `video` skill - load it when the request involves subtitles, ProRes, or YouTube.
 
+## OBS recording (CRF 14, since 2026-10-08)
+
+OBS records and lands new footage in **`/mnt/media/recordings`**,
+not `~/Videos/obs_footage/` (that folder holds the old lossy masters).
+
+Settings (Advanced output, profile `basic/profiles/Untitled/`):
+- Encoder `obs_x264`, rate control **CRF 14** (H.264, `High` profile),
+  preset `veryfast`, 1080p30, no rescale
+- Container **mkv**, audio **FLAC** (Track1), auto-split by time
+- Streaming is untouched: still VAAPI on the GPU; the recording encode eats
+  spare CPU cores
+- Was lossless (CRF 0 / `High 4:4:4 Predictive`) until 2026-10-08; reverted
+  because pure 4h gameplay would be ~300 GB. CRF 14 is the deliberate single
+  preset for both screen and gameplay sessions. Measured 2026-10-08:
+  **~37 Mbps ≈ 17 GB/hour (a 4 h stream ≈ 65-70 GB)** vs 186 Mbps/~335 GB lossless.
+
+The drive: `fileSystems."/mnt/media"` registered in `hosts/desktop/default.nix`
+(NTFS via ntfs3, uid=1000/gid=100, nofail). 932 GB, ~711 GB free after setup.
+
+Downstream rules still apply: the `.mkv` is the recording of record — **never
+delete or treat it as disposable**; the Resolve editing copy is a three-pass
+**ProRes LT** + `pcm_s16le` to `~/Videos/obs_footage/edit/*_edit.mov` (resolved
+against FLAC, not AAC). `_edit.mov` working copies **are** disposable: they are
+rebuilt from the source mkv any time. Source on `/mnt/media` outranks any encoded
+copy.
+
 ## Other video workflows
 Resolve-compatible transcoding and YouTube export recipes are in the `video` skill.
 Load it rather than improvising ffmpeg settings.
 
-Default to **ProRes Proxy**. DNxHR LB is a fallback only: it hit an ffmpeg assertion
-failure on a 4h stream and left an unplayable file.
+Default to **ProRes LT** (`-profile:v 1`) for the Resolve editing master, since
+2026-10-08. The source is CRF14 H.264 (~37 Mbps); LT (~102-109 Mbps) ≈ 2.8x that
+headroom holds text detail without softening, and at 1080p30 a 4 h master is
+**~184 GB** (LT) vs ~265 GB (422) vs ~400 GB (HQ). Output is YouTube-only, which
+re-encodes anyway - going above LT just wastes disk. Use 422 only if a specific
+clip still looks soft on text at 100% zoom. DNxHR LB is a fallback only: it hit
+an ffmpeg assertion failure on a 4h stream and left an unplayable file.
+
+**Whenever handing over a finished/encodable editing master (a ProRes LT
+`_edit.mov`), always remind the user to export it for YouTube at 2560×1440**
+(Deliver → 2560×1440, High Quality Resize, H.264 CRF ~16-18 slow, AAC 256k).
+The timeline stays 1920×1080; only the Deliver output is upscaled. Say it
+explicitly in the reply — e.g. "remember to export at 1440p" — the user relies
+on this reminder and does not want it in AGENTS-as-config, only prompted per
+handover.
 
 ### CRITICAL: never transcode video and audio in one ffmpeg command
 
@@ -83,10 +122,10 @@ already produced two broken masters (21 GB and 34 GB) that had to be rebuilt.
 
 ```bash
 # WRONG - truncates audio, silently
-ffmpeg -i IN -c:v prores_ks -profile:v 0 -c:a pcm_s16le OUT.mov
+ffmpeg -i IN -c:v prores_ks -profile:v 1 -c:a pcm_s16le OUT.mov
 
 # RIGHT - three passes, mux with -c copy
-ffmpeg -i IN -map 0:v:0 -c:v prores_ks -profile:v 0 -pix_fmt yuv422p10le /tmp/_v.mov
+ffmpeg -i IN -map 0:v:0 -c:v prores_ks -profile:v 1 -pix_fmt yuv422p10le /tmp/_v.mov
 ffmpeg -i IN -map 0:a:0 -c:a pcm_s16le /tmp/_a.wav
 ffmpeg -i /tmp/_v.mov -i /tmp/_a.wav -c copy -map 0:v:0 -map 1:a:0 OUT.mov
 ```
@@ -116,7 +155,7 @@ Prefer the bundled checker, which runs every check and exits non-zero on failure
 User cuts in Resolve. One master + one full-length SRT serves both outputs; the
 SRT must **never** be burned in during transcoding.
 
-- "make it editable" / "make stream editable for davinci" -> produce a ProRes Proxy
+- "make it editable" / "make stream editable for davinci" -> produce a ProRes LT
   master in `~/Videos/obs_footage/edit/`, keep subtitles out of it, **three-pass**
   (video, audio, mux) per the rules above
 - **Long form** -> Deliver → Subtitle Settings → leave *Export Subtitle* unticked
@@ -125,5 +164,7 @@ SRT must **never** be burned in during transcoding.
 - Cut shorts on the **full-length timeline**. Copying a clip to a new timeline
   starts that timeline at 00:00:00 while cues keep their original stamp, so subs
   land wrong or vanish.
-- Never delete the master or the original source without explicit confirmation
+- Never delete the master, the original source, or anything on `/mnt/media`
+  without explicit confirmation (that includes the `.mkv` recordings and any
+  `_edit.mov` working copies)
 

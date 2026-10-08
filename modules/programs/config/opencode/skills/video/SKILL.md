@@ -119,7 +119,12 @@ follow these instructions:
   still needs transcoding to become editable. Never treat one as implying the other.
 
 ### Conversion Settings
-- **Output codec**: ProRes 422 (not HQ - saves space while maintaining quality)
+- **Output codec**: ProRes **LT** (profile 1) as the editing-master default since
+  2026-10-08. Rationale: output is YouTube-only (re-encodes on upload anyway), and
+  the source ceiling is OBS CRF14 H.264 (~37 Mbps), so LT (~102-109 Mbps) ≈ 2.8x
+  the source holds text detail without softening. Proxy (the old default) was too
+  lean on text edges; 422/HQ only waste disk on a YouTube pipeline. Go up to 422
+  only if a specific clip still looks soft on text at 100% zoom in Resolve.
 - **Output format**: `.mov` container
 - **Audio**: PCM 16-bit signed little-endian (`pcm_s16le`)
 - **Sample rate**: Preserve original (typically 48000 Hz)
@@ -127,9 +132,12 @@ follow these instructions:
 
 ### FFmpeg Command Templates
 
-**Default - ProRes Proxy, TWO PASSES.** Measured on this machine (Ryzen 7 5800X,
-720p30 source): **~3.1-3.4x realtime** on the video pass, ~20 Mbps, so a 4h stream
-takes ~76 min and lands ~36 GB.
+**Default - ProRes LT, THREE passes** (never single-pass - see the truncation bug below).
+Measured on this machine (Ryzen 7 5800X, 1080p30 CRF14 source): **~1.06x realtime**
+on the video pass at ~109 Mbps, so a 4h stream takes ~3.8 h to encode and lands
+**~184 GB** (vs ~265 GB for 422, ~400 GB for HQ - overkill on a YouTube-only
+pipeline since YouTube re-encodes on upload anyway). Proxy (~45 Mbps, ~81 GB/4h)
+was the default until 2026-10-08 but is too lean to hold text-edge detail.
 
 **NEVER combine video and audio in a single ffmpeg command.** A single-pass
 `ffmpeg -i IN -c:v prores_ks -c:a pcm_s16le OUT.mov` **silently truncates the audio
@@ -138,7 +146,7 @@ important rule in this skill.
 
 ```bash
 # Pass 1: video only (the slow part)
-ffmpeg -y -i INPUT -map 0:v:0 -c:v prores_ks -profile:v 0 -pix_fmt yuv422p10le /tmp/_v.mov
+ffmpeg -y -i INPUT -map 0:v:0 -c:v prores_ks -profile:v 1 -pix_fmt yuv422p10le /tmp/_v.mov
 
 # Pass 2: audio only, to WAV (seconds, not minutes)
 ffmpeg -y -i INPUT -map 0:a:0 -c:a pcm_s16le /tmp/_a.wav
@@ -176,7 +184,7 @@ single-pass ProRes/DNxHR master built here.
 
 ```bash
 # NEVER use these
-ffmpeg -i IN -c:v prores_ks -profile:v 0 -c:a pcm_s16le OUT.mov     # WRONG
+ffmpeg -i IN -c:v prores_ks -profile:v 1 -c:a pcm_s16le OUT.mov     # WRONG
 ffmpeg -i IN -c:v dnxhd -profile:v dnxhr_lb -c:a pcm_s16le OUT.mov  # WRONG
 ```
 
@@ -189,11 +197,11 @@ the documented default.
 
 ```bash
 ffmpeg -y -i INPUT -map 0:v:0 -c:v dnxhd -profile:v dnxhr_lb -pix_fmt yuv422p10le /tmp/_v.mov
-# then the same audio + mux passes as the ProRes Proxy template
+# then the same audio + mux passes as the ProRes LT template
 ```
 
-**ProRes 422** - only for a final deliverable that needs it. ~3x the size (~114 GB
-for a 4h stream) and much slower. Two-pass only, as above.
+**ProRes 422** - escalation only, when a specific clip is still soft on text at 100%
+zoom in Resolve. ~1.4x LT (~264 GB for a 4h stream). Three passes only, as above.
 
 ```bash
 # pass 1: -c:v prores_ks -profile:v 2 -pix_fmt yuv422p10le  -> /tmp/_v.mov
@@ -212,7 +220,7 @@ process group on timeout:
 ```bash
 setsid nohup bash -c '
 SRC=INPUT
-ffmpeg -y -v error -i "$SRC" -map 0:v:0 -c:v prores_ks -profile:v 0 \
+ffmpeg -y -v error -i "$SRC" -map 0:v:0 -c:v prores_ks -profile:v 1 \
   -pix_fmt yuv422p10le /tmp/_v.mov
 ffmpeg -y -v error -i "$SRC" -map 0:a:0 -c:a pcm_s16le /tmp/_a.wav
 ffmpeg -y -v error -i /tmp/_v.mov -i /tmp/_a.wav -c copy \
@@ -336,14 +344,14 @@ No `yt-dlp` flag solves this: `--audio-format wav` decodes via ffmpeg but drops 
 video and leaves you re-syncing by hand, and `-f "bestaudio[acodec^=mp4a]"` just
 swaps Opus for AAC, which is *also* missing. **Transcode to PCM.**
 
-Follow [Resolve conversion](#resolve-conversion) - same ProRes Proxy + `pcm_s16le`
+Follow [Resolve conversion](#resolve-conversion) - same ProRes LT + `pcm_s16le`
 settings and the same mandatory three passes:
 
 ```bash
 SRC="/path/to/clip.webm"
 OUT="$(dirname "$SRC")/$(basename "${SRC%.*}")_edit.mov"
 
-ffmpeg -y -v error -i "$SRC" -map 0:v:0 -c:v prores_ks -profile:v 0 \
+ffmpeg -y -v error -i "$SRC" -map 0:v:0 -c:v prores_ks -profile:v 1 \
   -pix_fmt yuv422p10le /tmp/_v.mov
 ffmpeg -y -v error -i "$SRC" -map 0:a:0 -c:a pcm_s16le /tmp/_a.wav
 ffmpeg -y -v error -i /tmp/_v.mov -i /tmp/_a.wav -c copy \
@@ -462,8 +470,8 @@ YouTube upload, follow these instructions:
 
 ### Source Files
 - Location: `~/Videos/` or `~/Videos/obs_footage/edit/`
-- Format: `.mov` files - **ProRes Proxy, ProRes 422, or DNxHR LB**. Do not assume
-  ProRes 422 specifically; the editable master defaults to ProRes Proxy.
+- Format: `.mov` files - **ProRes LT (default), ProRes 422, or DNxHR LB**. Do not
+  assume ProRes 422 specifically; the editable master defaults to ProRes LT.
 
 ### Conversion Settings
 - **Output codec**: H.264 (MP4 container) - universally accepted by YouTube
@@ -501,9 +509,11 @@ This YouTube export step is for **clean video without subtitles** - the long for
 case. For shorts with burned-in subs, export from Resolve instead.
 
 ### Cleanup
-- **Never delete the editable master automatically.** A 4h master is ~36 GB and is
-  the only Resolve-editable copy; the user may still need it for further cuts.
-- Never delete the original source MP4, ever.
+- **Never delete the editable master automatically.** A 4h ProRes LT master is
+  ~184 GB and is the only Resolve-editable copy; the user may still need it for
+  further cuts. Delete only with explicit confirmation, and note it is rebuilt
+  from the recording source afterward - the source on `/mnt/media` outranks it.
+- Never delete the original source MP4 or anything on `/mnt/media`, ever.
 - Always ask before deleting anything, and report space freed if confirmed.
 
 ### Workflow
