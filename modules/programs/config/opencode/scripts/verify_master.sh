@@ -60,28 +60,43 @@ if [ "${FAIL}" -eq 0 ]; then
   fi
 fi
 
-# ---- audio byte count proves samples exist end to end ----
-BYTES=$(ffmpeg -v error -i "$OUT" -map 0:a -f s16le - 2>/dev/null | wc -c)
-echo "audio bytes decoded: $BYTES"
+# ---- audio byte counts, PER STREAM (proves samples exist end to end) ----
+# OBS records 2 audio tracks since 2026-10-12. `-map 0:a` maps every stream into a
+# single-stream s16le muxer, which errors and yields 0 bytes - a false FAIL.
+# Loop one stream at a time instead.
+NA=$(ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 "$OUT" 2>/dev/null | grep -c .)
+: "${NA:=0}"
+echo "audio tracks: $NA"
 if [ "${FAIL}" -eq 0 ]; then
-  EXPECT=$(awk -v d="$AD" 'BEGIN{printf "%d", d*48000*2*2}')
-  PCT=$(awk -v b="$BYTES" -v e="$EXPECT" 'BEGIN{if(e>0)printf "%.1f", b*100/e; else print 0}')
-  echo "expected (approx):   $EXPECT   -> ${PCT}%"
-  if awk -v b="$BYTES" -v e="$EXPECT" 'BEGIN{exit !(b < e*0.99)}'; then
-    echo "FAIL: audio bytes below 99% of duration-implied size"
-    FAIL=1
-  fi
+  an=0
+  while [ "$an" -lt "$NA" ]; do
+    ADn=$(dur "$OUT" "a:$an")
+    BN=$(ffmpeg -v error -i "$OUT" -map 0:a:$an -f s16le - 2>/dev/null | wc -c)
+    EN=$(awk -v d="$ADn" 'BEGIN{printf "%d", d*48000*2*2}')
+    PN=$(awk -v b="$BN" -v e="$EN" 'BEGIN{if(e>0)printf "%.1f", b*100/e; else print 0}')
+    echo "audio[$an] bytes: $BN  expected: $EN  -> ${PN}%"
+    if awk -v b="$BN" -v e="$EN" 'BEGIN{exit !(b < e*0.99)}'; then
+      echo "FAIL: audio track $an bytes below 99% of duration-implied size"
+      FAIL=1
+    fi
+    an=$((an+1))
+  done
 fi
 
-# ---- audio probe near the end (direct truncation test) ----
+# ---- audio probe near the end, PER STREAM (direct truncation test) ----
 if [ "${FAIL}" -eq 0 ]; then
-  PROBE=$(awk -v d="$AD" 'BEGIN{s=d-60; if(s<0)s=0; printf "%.0f", s}')
-  PB=$(ffmpeg -v error -ss "$PROBE" -i "$OUT" -map 0:a -t 5 -f s16le - 2>/dev/null | wc -c)
-  echo "audio probe at ${PROBE}s (5s): $PB bytes"
-  if [ "$PB" -eq 0 ]; then
-    echo "FAIL: no audio decodes near the end of the timeline"
-    FAIL=1
-  fi
+  an=0
+  while [ "$an" -lt "$NA" ]; do
+    ADn=$(dur "$OUT" "a:$an")
+    PROBE=$(awk -v d="$ADn" 'BEGIN{s=d-60; if(s<0)s=0; printf "%.0f", s}')
+    PB=$(ffmpeg -v error -ss "$PROBE" -i "$OUT" -map 0:a:$an -t 5 -f s16le - 2>/dev/null | wc -c)
+    echo "audio[$an] probe at ${PROBE}s (5s): $PB bytes"
+    if [ "$PB" -eq 0 ]; then
+      echo "FAIL: no audio decodes near the end of track $an"
+      FAIL=1
+    fi
+    an=$((an+1))
+  done
 fi
 
 # ---- moov atom ----

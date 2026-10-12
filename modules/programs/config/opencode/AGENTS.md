@@ -76,7 +76,7 @@ not `~/Videos/obs_footage/` (that folder holds the old lossy masters).
 Settings (Advanced output, profile `basic/profiles/Untitled/`):
 - Encoder `obs_x264`, rate control **CRF 14** (H.264, `High` profile),
   preset `veryfast`, 1080p30, no rescale
-- Container **mkv**, audio **FLAC** (Track1), auto-split by time
+- Container **mkv**, audio **FLAC**, **2 tracks** (since 2026-10-12), auto-split by time
 - Streaming is untouched: still VAAPI on the GPU; the recording encode eats
   spare CPU cores
 - Was lossless (CRF 0 / `High 4:4:4 Predictive`) until 2026-10-08; reverted
@@ -139,7 +139,7 @@ durations and report the real numbers:
 ```bash
 ffprobe -v error -select_streams v:0 -show_entries stream=duration -of csv=p=0 OUT.mov
 ffprobe -v error -select_streams a:0 -show_entries stream=duration -of csv=p=0 OUT.mov
-ffmpeg -v error -i OUT.mov -map 0:a -f s16le - 2>/dev/null | wc -c
+ffmpeg -v error -i OUT.mov -map 0:a:0 -f s16le - 2>/dev/null | wc -c   # repeat per track
 ```
 
 Audio duration shorter than video duration means a truncated master. Rebuild it.
@@ -150,6 +150,15 @@ Prefer the bundled checker, which runs every check and exits non-zero on failure
 ```bash
 ~/.opencode/scripts/verify_master.sh OUTPUT.mov SOURCE.m4v
 ```
+
+### OBS 2-track masters in Resolve (since 2026-10-12)
+OBS now records FLAC with **2 audio tracks**. Preserve both in the `_edit.mov`
+(`-map 0:a:0 -map 0:a:1`, one WAV per track in the audio pass). Resolve then shows
+only **one** timeline audio track if the clip is added from the **Edit** page -
+that is its multi-stream `.mov` handling, not a bad file; do not reconvert.
+Fix: in **Clip Attributes → Audio** confirm two stereo rows (Embedded 1&2, 3&4),
+then add the clip from the **Cut** page. Verified 2026-10-12. Detail in the
+`video` skill.
 
 ## Long form vs shorts (same master)
 User cuts in Resolve. One master + one full-length SRT serves both outputs; the

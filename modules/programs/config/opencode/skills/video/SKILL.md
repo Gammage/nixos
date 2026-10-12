@@ -14,6 +14,7 @@ loaded; this skill is the supported location.
 | Any H.264/H.265/AAC media -> editable for Resolve | [Resolve conversion](#resolve-conversion) |
 | Phone ProRes clips -> smaller editable copy | [Resolve conversion](#resolve-conversion) |
 | **yt-dlp / YouTube download has no audio in Resolve** | **[yt-dlp downloads](#yt-dlp-downloads)** |
+| OBS 2-track recording -> two separate audio tracks in Resolve | [Multiple audio tracks](#multiple-audio-tracks-obs-2-track-output) |
 | Long form (no subs) vs shorts (burned-in subs) | [Stream deliverables](#stream-deliverables-long-form-and-shorts) |
 | Finished edit -> YouTube upload | [YouTube export](#youtube-export) |
 | Stream recording -> subtitles (SRT) | [Subtitles for OBS streams](#subtitles-for-obs-streams) |
@@ -129,6 +130,9 @@ follow these instructions:
 - **Audio**: PCM 16-bit signed little-endian (`pcm_s16le`)
 - **Sample rate**: Preserve original (typically 48000 Hz)
 - **Channels**: Preserve original (typically 2ch stereo)
+- **Audio tracks**: preserve **all** tracks. OBS records 2 (mix + mic) since
+  2026-10-12 - the single-stream template below maps only `0:a:0` and silently
+  drops the second. See [Multiple audio tracks](#multiple-audio-tracks-obs-2-track-output).
 
 ### FFmpeg Command Templates
 
@@ -157,6 +161,10 @@ ffmpeg -y -i /tmp/_v.mov -i /tmp/_a.wav -c copy -map 0:v:0 -map 1:a:0 OUTPUT.mov
 
 Verified correct on this machine: 1200 s source -> video 1200.000, audio 1200.000,
 230400000 audio bytes (exactly 1200 x 48000 x 2ch x 2bytes).
+
+**Multiple audio tracks (OBS 2-track output):** the template above maps only
+`0:a:0`. For a 2-track recording, map every audio stream - see
+[Multiple audio tracks](#multiple-audio-tracks-obs-2-track-output).
 
 #### Audio truncation bug (cost two 21 GB/34 GB masters)
 
@@ -297,6 +305,48 @@ that alone.
   needs no video transcoding to exist, import, or be styled.
 - Prefer `~/.opencode/scripts/verify_master.sh OUT.mov SOURCE` over hand-running
   the checks. It runs every one and exits non-zero on failure.
+
+### Multiple audio tracks (OBS 2-track output)
+
+OBS records **two** audio tracks (since 2026-10-12; see AGENTS.md). Preserve both
+in the master - the single-stream template above maps only `0:a:0` and silently
+drops the rest.
+
+```bash
+# pass 1 (video): unchanged
+# pass 2: one WAV per audio track
+ffmpeg -y -i INPUT -map 0:a:0 -c:a pcm_s16le /tmp/_a0.wav
+ffmpeg -y -i INPUT -map 0:a:1 -c:a pcm_s16le /tmp/_a1.wav
+# pass 3: mux video + both tracks, still -c copy
+ffmpeg -y -i /tmp/_v.mov -i /tmp/_a0.wav -i /tmp/_a1.wav -c copy \
+  -map 0:v:0 -map 1:a:0 -map 2:a:0 OUTPUT.mov
+```
+
+Verify OUTPUT has 1 video + 2 `pcm_s16le` streams, and each audio track's decoded
+byte count equals its duration x 48000 x 2ch x 2 bytes. `verify_master.sh` loops
+per audio stream (fixed 2026-10-12), so it handles this - it used to false-FAIL
+with `audio bytes below 99%` because `-map 0:a` into a single-stream `s16le`
+muxer errors and reads 0 bytes.
+
+#### Resolve import: the Cut-page gotcha
+
+A correct 2-track master still appears as a **single timeline audio track** when
+added from the **Edit page** - this is Resolve's multi-stream `.mov` handling, not
+a bad file. **Do not reconvert.** (Verified 2026-10-12.)
+
+1. Media Pool -> right-click the clip -> **Clip Attributes...** -> **Audio** tab.
+   Confirm two rows: `Stereo` / Embedded Channel 1 & 2, and `Stereo` / Embedded
+   Channel 3 & 4. Click OK.
+2. Add the clip to the timeline from the **Cut** page (**not** the Edit page) -
+   both audio tracks then appear.
+3. If it was already placed from the Edit page, delete that instance and re-add it
+   via Cut. Clip audio attributes are cached at first import, so a pre-existing
+   timeline instance keeps the old single-track state.
+
+Set Clip Attributes **before** dragging the clip in. Fallback if Cut-page
+placement still fails: export the tracks as standalone stereo WAVs
+(`_A1.wav` / `_A2.wav`, both starting at 0) and drop each on its own audio track -
+guaranteed, no Clip Attributes involved.
 
 ---
 

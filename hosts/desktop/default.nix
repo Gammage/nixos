@@ -72,6 +72,7 @@ in {
       whisper
       steam
       prismlauncher
+      curseforge
 
       ({ pkgs, ...}: {
         home.username = username;

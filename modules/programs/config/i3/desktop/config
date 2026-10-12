@@ -36,7 +36,7 @@ exec_always xrandr --output DP-3 --off --output HDMI-1 --mode 1920x1080 --pos 38
 # ----------------------------
 # BASIC CONTROLS
 # ----------------------------
-bindsym $mod+d exec dmenu_run
+bindsym $mod+d exec --no-startup-id rm -f ~/.cache/dmenu_run && dmenu_run
 bindsym $mod+Return exec wezterm
 bindsym $mod+Shift+q kill
 bindsym $mod+Shift+e exec i3-msg exit
