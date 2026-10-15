@@ -6,6 +6,7 @@
           pkgs.obs-studio-plugins.obs-aitum-multistream
           pkgs.obs-studio-plugins.obs-vertical-canvas
           pkgs.obs-studio-plugins.droidcam-obs
+          pkgs.obs-studio-plugins.obs-source-record
         ];
       })
     ];
