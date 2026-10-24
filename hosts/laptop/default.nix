@@ -51,6 +51,7 @@ in {
 
     modules = with self.modules.homeManager; [
       core
+      yazi
       graphical
       obsStudio
 
