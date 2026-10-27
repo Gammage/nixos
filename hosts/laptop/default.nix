@@ -28,6 +28,11 @@ in {
           enable32Bit = true;
         };
 
+        zramSwap = {
+          enable = true;
+          memoryPercent = 50;
+        };
+
         boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
         nixpkgs.hostPlatform.system = system;
@@ -58,7 +63,6 @@ in {
       core
       yazi
       graphical
-      obsStudio
 
       {
         home.username = username;

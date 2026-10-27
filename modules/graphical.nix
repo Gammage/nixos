@@ -34,25 +34,30 @@
   };
 
   # HOME - MANAGER
-  flake.modules.homeManager.graphical = { pkgs, lib, ... }: {
-    home.packages = with pkgs; [
+  flake.modules.homeManager.graphical = { pkgs, lib, hostname, ... }:
+  let
+    commonPackages = with pkgs; [
       arandr
       dmenu
-      discord
       firefox
-      gimp
       maim
-      obsidian
-      google-chrome
-      tor-browser
       i3
       i3status
       polybarFull
       wezterm
+    ];
+    desktopPackages = with pkgs; [
+      discord
+      gimp
+      obsidian
+      google-chrome
+      tor-browser
       imagemagick
       zoom-us
       wineWow64Packages.stable
     ];
+  in {
+    home.packages = commonPackages ++ lib.optionals (hostname == "desktop") desktopPackages;
 
     home.file = {
       ".config/wezterm/wezterm.lua".text = builtins.readFile ./programs/config/wezterm/wezterm.lua;
