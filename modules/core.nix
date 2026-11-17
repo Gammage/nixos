@@ -56,7 +56,14 @@
       fzf
       coreutils
       bash
-      inputs.opencode.packages.${pkgs.system}.opencode
+      (inputs.opencode.packages.${pkgs.system}.opencode.overrideAttrs (old: {
+        node_modules = old.node_modules.overrideAttrs (nodeModules: {
+          outputHash = if pkgs.system == "x86_64-linux" then
+            "sha256-At902X9Dxopt9Z2oHelDXwb9mgM9wPpI44UlQApLVYg="
+          else
+            nodeModules.outputHash;
+        });
+      }))
       git
       gh
       tmux
