@@ -8,6 +8,7 @@
     import-tree.url = "github:vic/import-tree";
     nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
     opencode.url = "github:sst/opencode";
+    opencode.inputs.nixpkgs.follows = "nixpkgs";
 
     home-manager = {
       url = "github:nix-community/home-manager";
