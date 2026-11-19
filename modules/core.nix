@@ -59,7 +59,7 @@
       (inputs.opencode.packages.${pkgs.system}.opencode.overrideAttrs (old: {
         node_modules = old.node_modules.overrideAttrs (nodeModules: {
           outputHash = if pkgs.system == "x86_64-linux" then
-            "sha256-At902X9Dxopt9Z2oHelDXwb9mgM9wPpI44UlQApLVYg="
+            "sha256-vBHIePJ8Z11wEzxw6VWMiRUvpOf2vXQsne/kKfd2b8I="
           else
             nodeModules.outputHash;
         });
